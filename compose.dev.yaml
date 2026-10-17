@@ -1,0 +1,27 @@
+# Development toolchain — runs in OrbStack. Nothing Node-related runs on the host.
+#   scripts/dev.sh npm install
+#   scripts/dev.sh up            (vite :5173 + api :8080, hot reload)
+name: agelace-dev
+services:
+  dev:
+    image: node:24-bookworm
+    working_dir: /work
+    volumes:
+      - .:/work
+      # Linux-native deps live in volumes so host and container never share binaries.
+      - nm-root:/work/node_modules
+      - nm-app:/work/app/node_modules
+      - nm-server:/work/server/node_modules
+      - nm-shared:/work/shared/node_modules
+    environment:
+      AGELACE_WORLD: /work/world
+      AGELACE_POLL: "1"
+      CHOKIDAR_USEPOLLING: "1"
+    ports:
+      - "5173:5173"
+      - "8080:8080"
+volumes:
+  nm-root:
+  nm-app:
+  nm-server:
+  nm-shared:

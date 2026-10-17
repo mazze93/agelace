@@ -1,0 +1,14 @@
+# The whole of agelace. Your world lives in ./world next to this file —
+# back that folder up and you have backed up everything.
+services:
+  agelace:
+    build: .
+    image: agelace:local
+    init: true
+    restart: unless-stopped
+    ports:
+      # Localhost only by default. To open it to a tablet on your own network,
+      # start with AGELACE_BIND=0.0.0.0 (the launchers have a --share option).
+      - "${AGELACE_BIND:-127.0.0.1}:${AGELACE_PORT:-8080}:8080"
+    volumes:
+      - ./world:/world

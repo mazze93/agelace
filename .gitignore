@@ -1,1 +1,11 @@
 .DS_Store
+node_modules/
+dist/
+*.tsbuildinfo
+# live world data (mounted into the container) — never committed
+world/
+# fonts collected from @fontsource at build time
+server/fonts-builtin/
+test-results/
+playwright-report/
+CLAUDE.local.md

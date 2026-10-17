@@ -1,0 +1,105 @@
+/* ─────────────────────────────────────────────────────────────────────
+   agelace — design tokens
+   Tone: a lamplit archive. The restraint of a well-made book, not the
+   costume of one: laid paper, oak-gall ink, red rubrics, verdigris.
+   No parchment textures, torn edges, wax seals or dragon clip-art.
+   ───────────────────────────────────────────────────────────────────── */
+
+:root {
+  /* type */
+  --font-display: "IM Fell English", "Iowan Old Style", Georgia, serif;
+  --font-display-sc: "IM Fell English SC", "IM Fell English", Georgia, serif;
+  --font-body: "Alegreya", "Iowan Old Style", Georgia, serif;
+  --font-label: "Alegreya Sans SC", "Gill Sans", "Trebuchet MS", sans-serif;
+
+  --step--1: clamp(0.8rem, 0.78rem + 0.1vw, 0.86rem);
+  --step-0: clamp(1.06rem, 1.02rem + 0.2vw, 1.19rem);
+  --step-1: clamp(1.3rem, 1.2rem + 0.45vw, 1.6rem);
+  --step-2: clamp(1.7rem, 1.5rem + 1vw, 2.3rem);
+  --step-4: clamp(2.8rem, 2.1rem + 3.4vw, 4.9rem);
+
+  --measure: 34em;
+  --margin-col: 15rem;
+  --rail: 17.5rem;
+  --radius: 3px;
+
+  /* paper & ink — light: bone vellum under a reading lamp */
+  --color-paper: #ede5d4;
+  --color-paper-raised: #f5efe2;
+  --color-paper-sunk: #e2d8c3;
+  --color-ink: #231d16;
+  --color-ink-soft: #5a4e3f;
+  --color-ink-faint: #8c7d68;
+  --color-rule: #cbbd9f;
+  --color-primary: var(--color-ink);
+  /* accents: rubric (vermilion, the red of chapter heads) + verdigris */
+  --color-accent: #ac361b;
+  --color-accent-2: #3d7466;
+  --color-accent-wash: color-mix(in oklab, var(--color-accent) 10%, transparent);
+  --color-focus: #2f5f8a;
+
+  /* statuses */
+  --color-canon: var(--color-ink);
+  --color-proposed: var(--color-accent-2);
+  --color-question: var(--color-accent);
+
+  /* laid-paper chain lines + lamp vignette (decorative, never interactive) */
+  --paper-laid: repeating-linear-gradient(
+    90deg,
+    transparent 0 31px,
+    color-mix(in oklab, var(--color-ink) 3.5%, transparent) 31px 32px
+  );
+  --paper-lines: repeating-linear-gradient(
+    0deg,
+    transparent 0 2px,
+    color-mix(in oklab, var(--color-ink) 1.6%, transparent) 2px 3px
+  );
+  --lamp: radial-gradient(120% 85% at 62% 18%, transparent 40%, color-mix(in oklab, #6b4a1f 16%, transparent) 100%);
+  --shadow-leaf: 0 1px 0 color-mix(in oklab, var(--color-ink) 8%, transparent),
+    0 18px 40px -22px color-mix(in oklab, #3b2a12 45%, transparent);
+
+  --ease-quill: cubic-bezier(0.2, 0.7, 0.1, 1);
+}
+
+/* dark: lamp-black with candlelit ink */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --color-paper: #15120e;
+    --color-paper-raised: #1d1913;
+    --color-paper-sunk: #0f0d0a;
+    --color-ink: #e8dec8;
+    --color-ink-soft: #b8aa90;
+    --color-ink-faint: #7f735f;
+    --color-rule: #3a3227;
+    --color-accent: #e0643c;
+    --color-accent-2: #6fb3a0;
+    --color-focus: #8cb8e0;
+    --lamp: radial-gradient(110% 80% at 62% 14%, color-mix(in oklab, #d9a648 7%, transparent) 0%, transparent 55%);
+    --shadow-leaf: 0 1px 0 #00000080, 0 22px 50px -24px #000000;
+  }
+}
+:root[data-theme="dark"] {
+  --color-paper: #15120e;
+  --color-paper-raised: #1d1913;
+  --color-paper-sunk: #0f0d0a;
+  --color-ink: #e8dec8;
+  --color-ink-soft: #b8aa90;
+  --color-ink-faint: #7f735f;
+  --color-rule: #3a3227;
+  --color-accent: #e0643c;
+  --color-accent-2: #6fb3a0;
+  --color-focus: #8cb8e0;
+  --lamp: radial-gradient(110% 80% at 62% 14%, color-mix(in oklab, #d9a648 7%, transparent) 0%, transparent 55%);
+  --shadow-leaf: 0 1px 0 #00000080, 0 22px 50px -24px #000000;
+}
+
+/* Inks offered by the editor's colour picker — manuscript pigments, not a rainbow. */
+:root {
+  --ink-lampblack: var(--color-ink);
+  --ink-rubric: var(--color-accent);
+  --ink-verdigris: var(--color-accent-2);
+  --ink-ultramarine: #2c4f9e;
+  --ink-oak-gall: #5b4632;
+  --ink-orpiment: #b8860b;
+  --ink-tyrian: #7a2a52;
+}

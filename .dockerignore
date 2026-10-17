@@ -1,0 +1,9 @@
+node_modules
+**/node_modules
+**/dist
+world
+.git
+docs
+test-results
+playwright-report
+server/fonts-builtin

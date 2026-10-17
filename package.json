@@ -1,0 +1,42 @@
+{
+  "name": "agelace",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "workspaces": [
+    "shared",
+    "server",
+    "app"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "npm run dev -w server & npm run dev -w app",
+    "build": "npm run build -w shared && npm run build -w app && npm run build -w server",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "fonts": "node scripts/collect-fonts.mjs"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "esbuild@0.25.12": true
+  },
+  "devDependencies": {
+    "@fontsource/im-fell-english": "^5.3.0",
+    "@fontsource/im-fell-english-sc": "^5.3.0",
+    "@fontsource/im-fell-dw-pica": "^5.3.0",
+    "@fontsource/alegreya": "^5.3.0",
+    "@fontsource/alegreya-sc": "^5.3.0",
+    "@fontsource/alegreya-sans-sc": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/cormorant-garamond": "^5.3.0",
+    "@fontsource/spectral": "^5.3.0",
+    "@fontsource/libre-baskerville": "^5.3.0",
+    "@fontsource/uncial-antiqua": "^5.3.0",
+    "@fontsource/unifrakturmaguntia": "^5.3.0",
+    "@fontsource/noto-sans-runic": "^5.3.0",
+    "@fontsource/caveat": "^5.3.0",
+    "@fontsource/kalam": "^5.3.0"
+  }
+}

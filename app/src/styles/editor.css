@@ -1,0 +1,393 @@
+/* ── toolbar: a composing stick, not a ribbon ────────────────────────── */
+.toolbar {
+  position: sticky;
+  top: 0.6rem;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.1rem;
+  align-items: center;
+  max-width: calc(var(--measure) + var(--margin-col) + 3.5rem);
+  margin: 0 0 2rem;
+  padding: 0.3rem 0.4rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--color-paper-raised) 92%, transparent);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--shadow-leaf);
+}
+.tool-group {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  padding-right: 0.35rem;
+  margin-right: 0.25rem;
+  border-right: 1px solid var(--color-rule);
+}
+.tool-group:last-child {
+  border-right: 0;
+}
+.tool,
+.tool-select {
+  min-width: 2.1rem;
+  height: 2.1rem;
+  padding: 0 0.45rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-ink-soft);
+  font: 400 1rem / 1 var(--font-display);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.tool-select {
+  font: 500 var(--step--1) / 1 var(--font-label);
+  letter-spacing: 0.04em;
+}
+.tool:hover,
+.tool-select:hover {
+  background: var(--color-accent-wash);
+  color: var(--color-ink);
+}
+.tool[aria-pressed="true"],
+.tool[aria-expanded="true"] {
+  background: var(--color-ink);
+  color: var(--color-paper);
+}
+.tool:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.font-pop > .tool {
+  min-width: 7.5rem;
+  justify-content: flex-start;
+  font-size: 1.05rem;
+}
+.ink-swatch {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background: conic-gradient(var(--ink-rubric) 0 33%, var(--ink-verdigris) 0 66%, var(--ink-ultramarine) 0);
+}
+.inks {
+  display: grid;
+  gap: 0.1rem;
+}
+.inks button {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  font: 500 var(--step--1) / 1 var(--font-label);
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+.inks button:hover {
+  background: var(--color-accent-wash);
+}
+.ink-dot {
+  width: 0.9rem;
+  height: 0.9rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.toolbar mark {
+  background: color-mix(in oklab, var(--ink-orpiment) 35%, transparent);
+  color: inherit;
+  padding: 0 0.15em;
+  border-radius: 2px;
+}
+.glyph-dropcap {
+  font-size: 1.3em;
+  color: var(--color-accent);
+}
+
+/* ── the page ────────────────────────────────────────────────────────── */
+.leaf-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, var(--measure)) var(--margin-col);
+  column-gap: 3.5rem;
+}
+.prose {
+  outline: none;
+  min-height: 40vh;
+  font-size: var(--step-0);
+  line-height: 1.62;
+  hyphens: auto;
+  hanging-punctuation: first;
+}
+.prose > * + * {
+  margin-top: 0.85em;
+}
+.prose p {
+  margin: 0;
+}
+.prose p + p {
+  margin-top: 0;
+  text-indent: 1.5em;
+}
+.prose h1,
+.prose h2,
+.prose h3 {
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1.1;
+  margin: 1.6em 0 0.5em;
+}
+.prose h1 {
+  font-size: var(--step-2);
+}
+.prose h2 {
+  font-size: var(--step-1);
+}
+.prose h3 {
+  font: 800 var(--step--1) / 1.2 var(--font-label);
+  letter-spacing: 0.16em;
+  color: var(--color-accent);
+}
+.prose blockquote {
+  margin: 1.4em 0 1.4em 2em;
+  padding: 0;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+.prose blockquote p {
+  text-indent: 0;
+}
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+.prose ul li::marker {
+  content: "◆  ";
+  color: var(--color-accent);
+  font-size: 0.6em;
+}
+.prose ol li::marker {
+  font-family: var(--font-display);
+  color: var(--color-accent);
+}
+.prose a:not([data-wikilink]) {
+  color: var(--color-accent-2);
+}
+.prose mark {
+  background: color-mix(in oklab, var(--ink-orpiment) 28%, transparent);
+  color: inherit;
+  padding: 0 0.08em;
+  border-radius: 2px;
+}
+.prose code {
+  font-family: ui-monospace, "Cascadia Mono", Menlo, monospace;
+  font-size: 0.86em;
+}
+
+/* rubricated initial */
+.prose p.drop-cap {
+  text-indent: 0;
+}
+.prose p.drop-cap::first-letter {
+  float: left;
+  font-family: var(--font-display);
+  font-size: 4.1em;
+  line-height: 0.82;
+  padding: 0.07em 0.09em 0 0;
+  color: var(--color-accent);
+}
+
+/* section break: a fleuron, not a line */
+.prose hr {
+  border: 0;
+  margin: 2em 0;
+  text-align: center;
+  overflow: visible;
+}
+.prose hr::after {
+  content: "❦";
+  font-family: var(--font-display);
+  font-size: 1.3em;
+  color: var(--color-accent);
+}
+.prose hr.ProseMirror-selectednode::after {
+  outline: 2px solid var(--color-focus);
+}
+
+.prose p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  font-style: italic;
+  color: var(--color-ink-faint);
+}
+
+/* footnote calls */
+.fn {
+  line-height: 0;
+}
+.fn-mark {
+  border: 0;
+  padding: 0 0 0 0.05em;
+  background: none;
+  font: 700 0.68em / 1 var(--font-body);
+  font-variant-numeric: lining-nums;
+  color: var(--color-accent);
+  cursor: pointer;
+  vertical-align: super;
+}
+.fn.is-selected .fn-mark {
+  outline: 2px solid var(--color-focus);
+  border-radius: 2px;
+}
+
+/* inline ornaments */
+.ornament {
+  color: var(--color-accent);
+  padding: 0 0.06em;
+}
+.ornament.is-selected {
+  outline: 2px solid var(--color-focus);
+  border-radius: 2px;
+}
+
+/* links between entries */
+.wikilink a {
+  display: inline;
+  text-indent: 0;
+  text-decoration: underline dotted color-mix(in oklab, var(--color-accent-2) 70%, transparent);
+  text-underline-offset: 0.18em;
+  color: var(--color-ink);
+}
+.wikilink a .sigil {
+  color: var(--color-accent-2);
+  margin-right: 0.2em;
+}
+.wikilink.is-unwritten a {
+  font-style: italic;
+  color: var(--color-accent);
+  text-decoration: underline dashed color-mix(in oklab, var(--color-accent) 60%, transparent);
+}
+.wikilink.is-selected a {
+  outline: 2px solid var(--color-focus);
+  border-radius: 2px;
+}
+
+/* ── the margin ──────────────────────────────────────────────────────── */
+.margin {
+  position: relative;
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+.margin ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.margin-note {
+  position: absolute;
+  top: var(--note-top, 0);
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: 1.3rem 1fr;
+  transition: top 160ms var(--ease-quill);
+}
+.margin-n {
+  font: 700 0.8rem / 1.5 var(--font-body);
+  font-variant-numeric: lining-nums;
+  color: var(--color-accent);
+}
+.margin textarea {
+  width: 100%;
+  resize: none;
+  overflow: hidden;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  font: italic 400 var(--step--1) / 1.45 var(--font-body);
+  color: var(--color-ink-soft);
+}
+.margin textarea:focus-visible {
+  outline: none;
+  box-shadow: -0.6rem 0 0 -0.5rem var(--color-accent);
+}
+
+/* ── [[ suggestions ──────────────────────────────────────────────────── */
+.suggest-host {
+  position: absolute;
+  z-index: 50;
+}
+.suggest {
+  list-style: none;
+  margin: 0;
+  padding: 0.3rem;
+  min-width: 16rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: var(--color-paper-raised);
+  box-shadow: var(--shadow-leaf), 0 2px 8px -4px #0004;
+}
+.suggest button {
+  display: grid;
+  grid-template-columns: 1.2rem 1fr auto;
+  gap: 0.55rem;
+  align-items: center;
+  width: 100%;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.suggest [aria-selected="true"] button {
+  background: var(--color-accent-wash);
+}
+.suggest small {
+  font: 500 0.7rem / 1 var(--font-label);
+  letter-spacing: 0.08em;
+  color: var(--color-ink-faint);
+}
+.suggest-new {
+  color: var(--color-accent);
+  font-family: var(--font-display);
+  font-size: 1.2em;
+}
+
+/* ── narrow: the margin becomes endnotes ─────────────────────────────── */
+@media (max-width: 1180px) {
+  .leaf-body {
+    grid-template-columns: minmax(0, var(--measure));
+  }
+  .margin:has(li) {
+    margin-top: 2.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--color-rule);
+  }
+  .margin-note {
+    position: static;
+    margin-bottom: 0.6rem;
+  }
+}
+
+/* dark lamp: lift the darker pigments so they still read */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ink-ultramarine: #7f9de0;
+    --ink-oak-gall: #b59a7c;
+    --ink-orpiment: #d9ad48;
+    --ink-tyrian: #c97aa4;
+  }
+}
+:root[data-theme="dark"] {
+  --ink-ultramarine: #7f9de0;
+  --ink-oak-gall: #b59a7c;
+  --ink-orpiment: #d9ad48;
+  --ink-tyrian: #c97aa4;
+}
