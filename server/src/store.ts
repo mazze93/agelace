@@ -162,8 +162,12 @@ export class WorldStore {
    * A crash or a sync client mid-read never sees a half-written file.
    */
   async writeJson(path: string, value: unknown): Promise<void> {
+    await this.writeBytes(path, JSON.stringify(value, null, 2) + "\n");
+  }
+
+  async writeBytes(path: string, data: Uint8Array | string): Promise<void> {
     const tmp = `${path}.${randomBytes(4).toString("hex")}.tmp`;
-    await writeFile(tmp, JSON.stringify(value, null, 2) + "\n", "utf8");
+    await writeFile(tmp, data);
     this.markWrite(path);
     try {
       await rename(tmp, path);

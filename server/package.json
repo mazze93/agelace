@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/index.js --external:fastify --external:@fastify/static --external:chokidar --external:@iconify-json/game-icons --external:@iconify/utils --external:zod",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/index.js --external:fastify --external:@fastify/static --external:chokidar --external:@iconify-json/game-icons --external:@iconify/utils --external:zod --external:yjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },
@@ -18,7 +18,8 @@
     "chokidar": "^5.0.0",
     "fastify": "^5.12.7",
     "opentype.js": "^2.0.0",
-    "zod": "^4.6.7"
+    "zod": "^4.6.7",
+    "yjs": "^13.6.33"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

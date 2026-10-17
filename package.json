@@ -38,5 +38,9 @@
     "@fontsource/noto-sans-runic": "^5.3.0",
     "@fontsource/caveat": "^5.3.0",
     "@fontsource/kalam": "^5.3.0"
+  },
+  "overrides": {
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
   }
 }

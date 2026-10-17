@@ -15,8 +15,8 @@ real and tested underneath.
 
 ## Status
 
-Phases 1–2 built (2026-10-17): container + folder-backed API + design system +
-rich-text editor. Next: phase 3, the custom canvas engine. Plan, decisions and
+Phases 1–3 built (2026-10-17): container + folder-backed API + design system +
+rich-text editor + Yjs canvas ("boards"). Next: phase 4, the graph view. Plan, decisions and
 resume point: `docs/journal/CHECKPOINT.md`. The root Perplexity `*.md` files are
 reference only. `test-report.md` "passes" tests that never ran against any code.
 
@@ -27,7 +27,14 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   (editor). This is a local app, so no Astro or Cloudflare.
 - The canvas is our own engine, **not tldraw**: its licence needs a key in
   production, and the hobby key is discretionary and watermarked. Excalidraw
-  (MIT) is fine for embedded sketch cards.
+  (MIT) powers sketch cards, opened full-screen in the Sketchbook.
+- Canvases are **Yjs docs** (`world/canvases/<id>.yjs` is the truth;
+  `<id>.canvas` is a JSON Canvas export for Obsidian, write-only). Sync is
+  plain HTTP + SSE (`app/src/canvas/sync.ts`). All local mutations go through
+  `transact()` with the `LOCAL` origin, which is what `Y.UndoManager` tracks.
+  Entries are still JSON files, single-writer.
+- Undo: one Cmd/Ctrl-Z router (`app/src/undo.ts`). `.ProseMirror` surfaces keep
+  their own history. Everything else goes to the most recently mounted target.
 
 ## Develop (all Node runs in OrbStack, never on the host)
 
@@ -56,6 +63,17 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   catches this.
 - Custom TipTap nodes that render `<a>` need a parse `priority` above the Link
   mark's, or the node is lost on an HTML round-trip.
+- There must be exactly one React. npm once hoisted React 18 to satisfy
+  Excalidraw's jotai peer, and every library hook then threw
+  "reading 'useRef'". Root `overrides` plus Vite `resolve.dedupe` prevent this.
+  After changing deps, check `scripts/dev.sh npm ls react` shows no 18.x.
+- CSS modifier classes must not reuse component class names. `tool-select`
+  and `card-image` both collided and broke layout and pointer events. Use
+  `is-*` / `uses-*` for state modifiers.
+- Live events carry `by` (the tab's client id). `subscribe()` drops a tab's
+  own echoes, so never re-apply your own save from the event stream.
+- The client id comes from `crypto.getRandomValues`. `randomUUID` only exists
+  in secure contexts, and the iPad over LAN http is not one.
 
 ## Container + portability contract
 

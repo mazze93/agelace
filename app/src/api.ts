@@ -1,9 +1,25 @@
-import type { Entry, EntryDraft, EntryPatch, EntrySummary, FontFaceInfo, WorldEvent, WorldMeta } from "@agelace/shared";
+import {
+  CLIENT_HEADER,
+  type CanvasSummary,
+  type Entry,
+  type EntryDraft,
+  type EntryPatch,
+  type EntrySummary,
+  type FontFaceInfo,
+  type WorldEvent,
+  type WorldMeta,
+} from "@agelace/shared";
+
+/** One id per tab: the server stamps events with it so we can ignore our own echoes. */
+// getRandomValues, not randomUUID: the latter only exists in secure contexts,
+// and a tablet reaching agelace over plain http on the LAN is not one.
+export const CLIENT_ID: string = Array.from(crypto.getRandomValues(new Uint8Array(12)), (b) => b.toString(16).padStart(2, "0")).join("");
+const idHeader = { [CLIENT_HEADER]: CLIENT_ID };
 
 async function call<T>(method: string, url: string, body?: unknown): Promise<T> {
   const res = await fetch(url, {
     method,
-    headers: body === undefined ? {} : { "content-type": "application/json" },
+    headers: body === undefined ? idHeader : { ...idHeader, "content-type": "application/json" },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`${method} ${url} → ${res.status}`);
@@ -20,29 +36,74 @@ export const api = {
   remove: (id: string) => call<void>("DELETE", `/api/entries/${encodeURIComponent(id)}`),
   fonts: () => call<FontFaceInfo[]>("GET", "/api/fonts"),
   icons: (q: string, limit = 120) => call<string[]>("GET", `/api/icons?q=${encodeURIComponent(q)}&limit=${limit}`),
-  uploadFont: async (file: File): Promise<{ file: string }> => {
-    const res = await fetch(`/api/fonts?name=${encodeURIComponent(file.name)}`, {
+  uploadFont: (file: File) => upload<{ file: string }>(`/api/fonts?name=${encodeURIComponent(file.name)}`, file),
+  uploadAsset: (file: File) => upload<{ file: string; url: string }>(`/api/assets?name=${encodeURIComponent(file.name)}`, file),
+
+  canvases: () => call<CanvasSummary[]>("GET", "/api/canvases"),
+  createCanvas: (name: string) => call<CanvasSummary>("POST", "/api/canvases", { name }),
+  removeCanvas: (id: string) => call<void>("DELETE", `/api/canvases/${encodeURIComponent(id)}`),
+  canvasState: async (id: string, sv?: Uint8Array): Promise<Uint8Array> => {
+    const q = sv ? `?sv=${toBase64Url(sv)}` : "";
+    const res = await fetch(`/api/canvases/${encodeURIComponent(id)}/state${q}`, { headers: idHeader });
+    if (!res.ok) throw new Error(`canvas ${id} → ${res.status}`);
+    return new Uint8Array(await res.arrayBuffer());
+  },
+  canvasUpdate: async (id: string, update: Uint8Array, keepalive = false): Promise<void> => {
+    const res = await fetch(`/api/canvases/${encodeURIComponent(id)}/update`, {
       method: "POST",
-      headers: { "content-type": "application/octet-stream" },
-      body: file,
+      headers: { ...idHeader, "content-type": "application/octet-stream" },
+      body: update as BodyInit,
+      keepalive,
     });
-    const json = (await res.json()) as { file: string; error?: string };
-    if (!res.ok) throw new Error(json.error ?? `upload failed (${res.status})`);
-    return json;
+    if (!res.ok) throw new Error(`canvas update → ${res.status}`);
   },
 };
 
+async function upload<T>(url: string, file: File): Promise<T> {
+  const res = await fetch(url, { method: "POST", headers: { ...idHeader, "content-type": "application/octet-stream" }, body: file });
+  const json = (await res.json()) as T & { error?: string };
+  if (!res.ok) throw new Error(json.error ?? `upload failed (${res.status})`);
+  return json;
+}
+
+function toBase64Url(bytes: Uint8Array): string {
+  let s = "";
+  for (const b of bytes) s += String.fromCharCode(b);
+  return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+}
+
 export const iconUrl = (name: string): string => `/api/icons/${encodeURIComponent(name)}.svg`;
 
-/** Server-sent world events; reconnects on its own (EventSource does). */
-export function subscribe(onEvent: (e: WorldEvent) => void): () => void {
-  const es = new EventSource("/api/events");
-  es.onmessage = (m) => {
-    try {
-      onEvent(JSON.parse(m.data as string) as WorldEvent);
-    } catch {
-      /* ignore malformed frames */
+/**
+ * Server-sent world events, multiplexed over ONE EventSource per tab (browsers
+ * allow only ~6 connections per host over HTTP/1.1). EventSource reconnects on
+ * its own. Pass `includeOwn` to also receive echoes of this tab's changes.
+ */
+type Listener = { fn: (e: WorldEvent) => void; includeOwn: boolean };
+const listeners = new Set<Listener>();
+let source: EventSource | null = null;
+
+export function subscribe(fn: (e: WorldEvent) => void, includeOwn = false): () => void {
+  const l: Listener = { fn, includeOwn };
+  listeners.add(l);
+  if (!source) {
+    source = new EventSource("/api/events");
+    source.onmessage = (m) => {
+      let e: WorldEvent;
+      try {
+        e = JSON.parse(m.data as string) as WorldEvent;
+      } catch {
+        return;
+      }
+      const own = e.by === CLIENT_ID;
+      for (const x of listeners) if (!own || x.includeOwn) x.fn(e);
+    };
+  }
+  return () => {
+    listeners.delete(l);
+    if (!listeners.size) {
+      source?.close();
+      source = null;
     }
   };
-  return () => es.close();
 }

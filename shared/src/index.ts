@@ -79,10 +79,25 @@ export interface FontFaceInfo {
   category?: string;
 }
 
+/**
+ * Live events. `by` is the client id that caused the change (sent by the app
+ * as the x-agelace-client header) so a client can ignore its own echoes;
+ * absent when the change came from outside (another app, a sync client, a hand edit).
+ */
 export type WorldEvent =
-  | { type: "entry"; id: Id; op: "upsert" | "delete" }
-  | { type: "fonts" }
-  | { type: "world" };
+  | { type: "entry"; id: Id; op: "upsert" | "delete"; by?: string }
+  | { type: "canvas"; id: Id; op: "upsert" | "delete"; by?: string }
+  | { type: "fonts"; by?: string }
+  | { type: "world"; by?: string };
+
+export interface CanvasSummary {
+  id: Id;
+  name: string;
+  updated: string;
+  nodes: number;
+}
+
+export const CLIENT_HEADER = "x-agelace-client";
 
 // ── Rich-doc helpers shared by server (indexing) and app ─────────────────
 

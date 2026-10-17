@@ -91,8 +91,10 @@ describe("icons", () => {
     expect(svg).toContain("currentColor");
   });
 
-  it("every default sigil exists", () => {
-    for (const n of ["quill-ink", "hood", "castle", "hourglass", "crystal-ball", "scroll-unfurled", "open-book"]) {
+  it("every icon the app names exists", () => {
+    // default sigils, editor + board toolbars, rail
+    const used = ["quill-ink", "hood", "castle", "hourglass", "crystal-ball", "scroll-unfurled", "open-book", "fleur-de-lys", "arrow-cursor", "hand", "quill", "broom", "treasure-map"];
+    for (const n of used) {
       expect(iconSvg(n), n).toBeDefined();
     }
   });
