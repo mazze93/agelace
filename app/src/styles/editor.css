@@ -98,7 +98,7 @@
   background: currentColor;
 }
 .toolbar mark {
-  background: color-mix(in oklab, var(--ink-orpiment) 35%, transparent);
+  background: color-mix(in oklab, var(--wash-orpiment) 35%, transparent);
   color: inherit;
   padding: 0 0.15em;
   border-radius: 2px;
@@ -178,7 +178,7 @@
   color: var(--color-accent-2);
 }
 .prose mark {
-  background: color-mix(in oklab, var(--ink-orpiment) 28%, transparent);
+  background: color-mix(in oklab, var(--wash-orpiment) 28%, transparent);
   color: inherit;
   padding: 0 0.08em;
   border-radius: 2px;
@@ -382,6 +382,7 @@
     --ink-ultramarine: #7f9de0;
     --ink-oak-gall: #b59a7c;
     --ink-orpiment: #d9ad48;
+    --wash-orpiment: #d9ad48;
     --ink-tyrian: #c97aa4;
   }
 }
@@ -389,5 +390,6 @@
   --ink-ultramarine: #7f9de0;
   --ink-oak-gall: #b59a7c;
   --ink-orpiment: #d9ad48;
+  --wash-orpiment: #d9ad48;
   --ink-tyrian: #c97aa4;
 }

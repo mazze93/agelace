@@ -16,7 +16,7 @@ decisions**, **§5 high-value work not yet done**, then the rest as needed.
 |---|---|
 | Phases built | 1 container + world API · 2 rich-text editor · 3 Yjs boards + undo · 4 the Pattern · 5 the Forge |
 | Next | 6: tutorial modules from mazze's workshopped excerpts, prefab assets |
-| Tests | server 33, app 18 (Vitest) · Bruno 26 requests / 52 assertions · browser 27 checks |
+| Tests | server 33, app 21 (Vitest, incl. contrast) · Bruno 26 requests / 52 assertions · browser 27 checks |
 | Verify everything | `scripts/dev.sh npm test` · `scripts/dev.sh npm run typecheck` · `scripts/api-check.sh` · `scripts/browser-check.sh` |
 | Ship check | `/portability-check` (amd64 image under emulation; last run 2026-10-18, healthy, casts a font) |
 | Design system | https://claude.ai/artifact/7QYgLXsN7Ly3Nh4N9m2rL3 (shared by link). Static renditions of 12 app components; **edits there do not flow back into the app** |
@@ -82,7 +82,7 @@ what it says · **M** = misleads, or works only by luck · **L** = polish.
 
 | # | What | Why open | Recommendation |
 |---|---|---|---|
-| O1 | **Contrast.** `color-ink-faint` is 3.2:1 on daylight paper and 4.0:1 by candle, under the 4.5:1 small text needs, and it carries many small labels. Verdigris on daylight paper is 4.3:1. The editor inks are single-valued: by candle ultramarine is 2.4:1, oak-gall 2.1:1, Tyrian 2.0:1; in daylight orpiment is 2.6:1 | A palette is mazze's call, not an audit's | Smallest changes that pass on every paper: ink-faint **#6a5d4c** (daylight, ≥4.52:1) and **#8c806a** (candle, ≥4.51:1); verdigris **#3c7062** (daylight, ≥4.55:1). Give the editor inks a candle value each. Then update the design system's tokens to match |
+| O1 | ✅ **Resolved 2026-10-18, see §9.** **Contrast.** `color-ink-faint` is 3.2:1 on daylight paper and 4.0:1 by candle, under the 4.5:1 small text needs, and it carries many small labels. Verdigris on daylight paper is 4.3:1. The editor inks are single-valued: by candle ultramarine is 2.4:1, oak-gall 2.1:1, Tyrian 2.0:1; in daylight orpiment is 2.6:1 | A palette is mazze's call, not an audit's | Smallest changes that pass on every paper: ink-faint **#6a5d4c** (daylight, ≥4.52:1) and **#8c806a** (candle, ≥4.51:1); verdigris **#3c7062** (daylight, ≥4.55:1). Give the editor inks a candle value each. Then update the design system's tokens to match |
 | O2 | Real hardware never touched the pen code: no Apple Pencil, no Windows Ink | No device in the session | One sitting on each: pressure feel, the eraser end (Windows), palm rejection, iPad over LAN (see O3) |
 | O3 | iPad over plain-http LAN is not a secure context | Needs local HTTPS (a cert the friend must trust) | Defer unless the iPad becomes a real use case; `mkcert` + a Caddy sidecar is the least-friction route |
 | O4 | 14 npm advisories (6 high), all through `@excalidraw/excalidraw` 0.18 (lodash-es, nanoid, katex, braces via sass) | The only automatic fix is a breaking downgrade to 0.17.6 | Browser-side only; the server image is unaffected. Watch for an Excalidraw release; meanwhile keep the default `127.0.0.1` binding and warn before `--share` |
@@ -257,3 +257,42 @@ feature, not a bug.
   together.
 - Append to this diary at each phase boundary: what was promised, what
   shipped, what diverged, and the rule learned. Don't rewrite old entries.
+
+---
+
+## 9. Close-out, 2026-10-18
+
+### The contrast fix (O1)
+mazze approved it. Applied in `app/src/styles/tokens.css` and `editor.css`:
+
+| Token | Lamp | Was | Now | On paper / raised |
+|---|---|---|---|---|
+| `--color-ink-faint` | daylight | #8c7d68 (3.2:1) | **#6a5d4c** | 5.1 / 5.6:1 |
+| `--color-ink-faint` | candle | #7f735f (4.0:1) | **#8c806a** | 4.8 / 4.5:1 |
+| `--color-accent-2` | daylight | #3d7466 (4.3:1) | **#3c7062** | 4.6 / 5.0:1 |
+| `--ink-orpiment` | daylight | #b8860b (2.6:1) | **#856108** | 4.5 / 4.9:1 |
+| `--wash-orpiment` | both | (new) | #b8860b / #d9ad48 | highlight tint only |
+
+Orpiment was also the colour every highlight tints with (`color-mix(… 35%)`),
+so darkening it for text would have muddied the highlights. Highlights now
+tint with `--wash-orpiment`, the original gold, and text uses the darker ink.
+
+`app/src/styles/contrast.test.ts` parses both stylesheets and fails if any
+text colour drops under 4.5:1 on any paper in either lamp. It was shown to
+fail on the old value (3.19:1) before being trusted. The design system's
+tokens and brand book were updated to match (version 4).
+
+### An error in this diary's own audit
+§4 O1 said the editor inks were "single-valued" and unreadable by candle
+(2.0–2.4:1). **That was wrong.** `editor.css` already lifts all four for the
+candle lamp (6.0–8.9:1); the audit read `tokens.css` and stopped. The design
+system repeated the error in its token notes; both are corrected. The only
+real ink failure was orpiment as daylight text. Lesson, added to §6.6: a
+claim about how a value behaves must come from *every* place that sets it.
+Grep for the property, not just the token file.
+
+### The rule
+The rules of §6 now live in `CLAUDE.md` under "Working rules", where every
+future session reads them before touching the code. This diary keeps the
+evidence behind each one.
+

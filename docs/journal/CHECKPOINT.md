@@ -116,10 +116,6 @@ the app: port them into `app/src/styles/tokens.css` by hand.
   secure context. Local HTTPS may be needed for the forge.
 - Margin-note stacking uses heights measured before auto-grow, so notes can
   overlap slightly when several sit close together.
-- Contrast: `--color-ink-faint` fails 4.5:1 for small text in both lamps
-  (3.2:1 daylight, 4.0:1 candle); verdigris on daylight paper is 4.3:1. The
-  editor inks ultramarine, oak-gall and Tyrian are near-unreadable on candle
-  paper. Kept as-is pending mazze's call; flagged in the design system.
 - Forge: stylus tested with synthetic pen events only, not real hardware.
   Kerning is not cast (spacing is per-glyph side bearings only).
 - Board: not yet tested with a real stylus (Windows Ink / Apple Pencil). Pen
@@ -135,6 +131,10 @@ the app: port them into `app/src/styles/tokens.css` by hand.
   so exposure is low, but `--share` widens it.
 
 ## Log
+
+- 2026-10-18 — Contrast fixed (ink-faint both lamps, verdigris and orpiment by
+  daylight; highlights keep the bright gold via `--wash-orpiment`), enforced by
+  `contrast.test.ts`. Working rules from the diary written into CLAUDE.md.
 
 - 2026-10-18 — Audit of phases 1–5 (see BUILD-DIARY.md §3). Fixed: casts could
   overwrite a dropped-in font or another hand's cast; renames left ghost

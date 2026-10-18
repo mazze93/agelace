@@ -110,6 +110,30 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
 - The client id comes from `crypto.getRandomValues`. `randomUUID` only exists
   in secure contexts, and the iPad over LAN http is not one.
 
+## Working rules (from docs/journal/BUILD-DIARY.md §6; the evidence is there)
+
+- A test must be able to fail for the reason in its name: before trusting it,
+  break the thing it guards and watch it go red. Compare before/after, not
+  "non-empty".
+- Probe a library behaviour that decides correctness in the dev container
+  before relying on it (zod defaults, opentype.js names, CJS imports were all
+  wrong from memory).
+- A claim about a value comes from every place that sets it: grep the
+  property, don't stop at the token file.
+- Writes into folders the user also writes to (`fonts/`, `assets/`) prove they
+  own the file they replace, or refuse. Retire to `.trash/`; never delete.
+- Event handlers decide from refs; React state is for what the user sees.
+- Any mode the app enters on its own is visible and reversible where it happens.
+- Docs that describe the code (the design-system artifact included) are
+  checked against the code before publishing; uncited prose is a proposal.
+- If a check was worth running once, it lives in the repo with an exit code
+  (`e2e/`, `bruno/`, Vitest). Nothing that proves a phase lives in scratch.
+- Shell: always quote heredocs (`<<'EOF'`); pass values through the environment.
+- At each phase boundary append to `BUILD-DIARY.md`: promised, shipped,
+  diverged, and the rule learned. Never rewrite old entries.
+- Every text colour reads at 4.5:1 on every paper in both lamps;
+  `app/src/styles/contrast.test.ts` enforces it.
+
 ## Container + portability contract
 
 - Develop and run in **OrbStack**, but use nothing OrbStack-specific (no

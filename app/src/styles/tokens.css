@@ -29,12 +29,12 @@
   --color-paper-sunk: #e2d8c3;
   --color-ink: #231d16;
   --color-ink-soft: #5a4e3f;
-  --color-ink-faint: #8c7d68;
+  --color-ink-faint: #6a5d4c; /* 4.5:1+ on every daylight paper */
   --color-rule: #cbbd9f;
   --color-primary: var(--color-ink);
   /* accents: rubric (vermilion, the red of chapter heads) + verdigris */
   --color-accent: #ac361b;
-  --color-accent-2: #3d7466;
+  --color-accent-2: #3c7062; /* 4.5:1+ on daylight paper */
   --color-accent-wash: color-mix(in oklab, var(--color-accent) 10%, transparent);
   --color-focus: #2f5f8a;
 
@@ -69,7 +69,7 @@
     --color-paper-sunk: #0f0d0a;
     --color-ink: #e8dec8;
     --color-ink-soft: #b8aa90;
-    --color-ink-faint: #7f735f;
+    --color-ink-faint: #8c806a; /* 4.5:1+ on every candle paper */
     --color-rule: #3a3227;
     --color-accent: #e0643c;
     --color-accent-2: #6fb3a0;
@@ -84,7 +84,7 @@
   --color-paper-sunk: #0f0d0a;
   --color-ink: #e8dec8;
   --color-ink-soft: #b8aa90;
-  --color-ink-faint: #7f735f;
+  --color-ink-faint: #8c806a; /* 4.5:1+ on every candle paper */
   --color-rule: #3a3227;
   --color-accent: #e0643c;
   --color-accent-2: #6fb3a0;
@@ -100,6 +100,7 @@
   --ink-verdigris: var(--color-accent-2);
   --ink-ultramarine: #2c4f9e;
   --ink-oak-gall: #5b4632;
-  --ink-orpiment: #b8860b;
+  --ink-orpiment: #856108; /* text: 4.5:1+ on daylight paper; #b8860b was 2.6:1 */
+  --wash-orpiment: #b8860b; /* highlights tint with the original gold */
   --ink-tyrian: #7a2a52;
 }
