@@ -15,9 +15,10 @@ real and tested underneath.
 
 ## Status
 
-Phases 1–4 built (2026-10-17): container + folder-backed API + design system +
-rich-text editor + Yjs canvas ("boards") + the Pattern (graph view, `#/pattern`).
-Next: phase 5, the font forge. Plan, decisions and
+Phases 1–5 built (2026-10-18): container + folder-backed API + design system +
+rich-text editor + Yjs canvas ("boards") + the Pattern (graph view, `#/pattern`) +
+the Forge (`#/forge`: type case, pairing, Scriptorium glyph drawing → .otf).
+Next: phase 6, tutorial modules and prefab assets. Plan, decisions and
 resume point: `docs/journal/CHECKPOINT.md`. The root Perplexity `*.md` files are
 reference only. `test-report.md` "passes" tests that never ran against any code.
 
@@ -38,6 +39,13 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   `PatternPage.tsx` runs d3-force and moves DOM nodes through refs on each tick,
   never through React state. Board summaries carry `entries` + `threads` so the
   graph never loads Y.Docs. Saved layout is per-viewer localStorage, whole view only.
+- The Forge (`app/src/forge/`): a *hand* is `world/forge/<id>.json` (pen strokes
+  in font units, y up, 1000/em). `shared/src/glyph.ts` is the one geometry path
+  for the live proof and the cast: nib → polygons → polygon-clipping union →
+  lines and quadratics. The server casts with opentype.js into
+  `world/fonts/<Family>.otf`. World font URLs carry `?v=<mtime>` so a recast
+  reloads. `typeset` in `world.json` is the world's hand, applied app-wide by
+  overriding the `--font-*` tokens.
 - Runtime-agnostic: image names are fully qualified (`docker.io/library/…`), the
   healthcheck lives in `compose.yaml` (Podman's OCI format drops a Dockerfile
   HEALTHCHECK), and launchers fall back from `docker` to `podman`.
@@ -67,8 +75,15 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
 
 ## Gotchas
 
-- Don't use zod `.default()` on `Entry` fields. `EntryPatch` is a `.partial()`
-  of it, so defaults get injected into every PATCH and overwrite real data.
+- Don't use zod `.default()` on any schema you `.partial()` for a PATCH: the
+  default is injected into every PATCH and overwrites real data. `EntryPatch`
+  avoids it; `WorldPatch` is built from default-free fields (a `.partial()` of
+  `WorldMeta` used to blank the epigraph on every rename).
+- polygon-clipping's sweep line throws "Unable to complete output ring" on raw
+  floats. `glyphContours` snaps to ¼ unit and folds polygons in one by one on
+  failure. Keep both.
+- opentype.js 2.x nests names per platform (`names.windows.fontFamily.en`);
+  read them through `fontName()` in `server/src/fonts.ts`.
 - Server deps that are CommonJS-only (e.g. opentype.js) must be bundled by
   esbuild, not marked `--external`, and imported by their **default** export.
   Vitest accepts named CJS imports that Node's ESM loader rejects, so a named

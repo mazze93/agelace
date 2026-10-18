@@ -1,0 +1,21 @@
+meta {
+  name: List hands
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/hands
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+docs {
+  `HandSummary[]`: `{ id, family, glyphs, updated, cast? }`. `glyphs` counts letters with ink;
+  `cast` names the file in `world/fonts/` once the hand has been cast.
+}

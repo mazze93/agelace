@@ -6,8 +6,12 @@ import {
   type EntryPatch,
   type EntrySummary,
   type FontFaceInfo,
+  type Hand,
+  type HandSummary,
+  type HandWrite,
   type WorldEvent,
   type WorldMeta,
+  type WorldPatch,
 } from "@agelace/shared";
 
 /** One id per tab: the server stamps events with it so we can ignore our own echoes. */
@@ -28,7 +32,7 @@ async function call<T>(method: string, url: string, body?: unknown): Promise<T> 
 
 export const api = {
   world: () => call<WorldMeta>("GET", "/api/world"),
-  setWorld: (patch: Partial<WorldMeta>) => call<WorldMeta>("PATCH", "/api/world", patch),
+  setWorld: (patch: WorldPatch) => call<WorldMeta>("PATCH", "/api/world", patch),
   entries: () => call<EntrySummary[]>("GET", "/api/entries"),
   entry: (id: string) => call<Entry>("GET", `/api/entries/${encodeURIComponent(id)}`),
   create: (draft: EntryDraft) => call<Entry>("POST", "/api/entries", draft),
@@ -38,6 +42,18 @@ export const api = {
   icons: (q: string, limit = 120) => call<string[]>("GET", `/api/icons?q=${encodeURIComponent(q)}&limit=${limit}`),
   uploadFont: (file: File) => upload<{ file: string }>(`/api/fonts?name=${encodeURIComponent(file.name)}`, file),
   uploadAsset: (file: File) => upload<{ file: string; url: string }>(`/api/assets?name=${encodeURIComponent(file.name)}`, file),
+
+  hands: () => call<HandSummary[]>("GET", "/api/hands"),
+  hand: (id: string) => call<Hand>("GET", `/api/hands/${encodeURIComponent(id)}`),
+  createHand: (family: string) => call<Hand>("POST", "/api/hands", { family }),
+  saveHand: (id: string, hand: HandWrite) => call<Hand>("PUT", `/api/hands/${encodeURIComponent(id)}`, hand),
+  removeHand: (id: string) => call<void>("DELETE", `/api/hands/${encodeURIComponent(id)}`),
+  castHand: async (id: string): Promise<{ file: string; family: string; glyphs: number; bytes: number }> => {
+    const res = await fetch(`/api/hands/${encodeURIComponent(id)}/cast`, { method: "POST", headers: idHeader });
+    const json = (await res.json()) as { file: string; family: string; glyphs: number; bytes: number; error?: string };
+    if (!res.ok) throw new Error(json.error ?? `cast failed (${res.status})`);
+    return json;
+  },
 
   canvases: () => call<CanvasSummary[]>("GET", "/api/canvases"),
   createCanvas: (name: string) => call<CanvasSummary>("POST", "/api/canvases", { name }),

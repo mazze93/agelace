@@ -1,0 +1,980 @@
+/* ── the Forge ──────────────────────────────────────────────────────────
+   A type-founder's case room. Specimens are pulled proofs in drawers;
+   the Scriptorium is a calligrapher's practice sheet, ruled in vermilion,
+   with hairlines at the nib's angle.                                     */
+
+.forge {
+  max-width: 82rem;
+  animation: rise 300ms var(--ease-quill) both;
+}
+.forge-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.6rem 2.2rem;
+  margin-bottom: 1.6rem;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--color-rule);
+}
+.forge-title {
+  margin: 0;
+  font: 400 var(--step-2) / 1 var(--font-display);
+}
+.forge-rooms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1.4rem;
+}
+.forge-rooms a {
+  display: grid;
+  text-decoration: none;
+  padding: 0.2rem 0 0.35rem;
+  border-bottom: 2px solid transparent;
+  color: var(--color-ink-soft);
+}
+.forge-rooms a span {
+  font: 400 var(--step-1) / 1.1 var(--font-display);
+}
+.forge-rooms a small {
+  font: 500 0.72rem / 1.2 var(--font-label);
+  letter-spacing: 0.06em;
+  color: var(--color-ink-faint);
+}
+.forge-rooms a:hover {
+  color: var(--color-ink);
+}
+.forge-rooms a[aria-current="page"] {
+  color: var(--color-ink);
+  border-bottom-color: var(--color-accent);
+}
+.forge-error {
+  color: var(--color-accent);
+  font-style: italic;
+}
+.rail-forge {
+  margin-top: 0.35rem;
+}
+
+/* shared buttons */
+.pair-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--color-ink);
+  border-radius: var(--radius);
+  background: var(--color-ink);
+  color: var(--color-paper);
+  font: 400 var(--step-0) / 1.1 var(--font-display);
+  cursor: pointer;
+}
+.pair-primary:hover:not(:disabled) {
+  background: var(--color-accent);
+  border-color: var(--color-accent);
+}
+.pair-primary:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+.pair-quiet {
+  padding: 0.35rem 0;
+  border: 0;
+  background: none;
+  font-style: italic;
+  color: var(--color-ink-soft);
+  text-decoration: underline;
+  text-decoration-color: var(--color-rule);
+  text-underline-offset: 0.2em;
+  cursor: pointer;
+}
+.pair-quiet:hover {
+  color: var(--color-accent);
+}
+
+/* ── type case ───────────────────────────────────────────────────────── */
+.case-bench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 11rem 13rem;
+  gap: 1rem 1.4rem;
+  align-items: end;
+}
+.case-bench label {
+  display: grid;
+  gap: 0.25rem;
+}
+.case-bench .sc,
+.pair-slot > .sc,
+.pair-dials .sc,
+.family-name .sc,
+.bench-section h3,
+.pair-shelf h3,
+.proof-section h3 {
+  font: 500 0.75rem / 1 var(--font-label);
+  letter-spacing: 0.1em;
+  color: var(--color-ink-faint);
+  margin: 0;
+}
+.case-specimen input,
+.case-find,
+.hands-new input,
+.pair-keep input,
+.family-name input,
+.hand-proof input,
+.ghost-pick,
+.pair-dials select {
+  width: 100%;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  background: var(--color-paper-raised);
+}
+.case-specimen input {
+  font: italic 400 var(--step-1) / 1.2 var(--font-body);
+}
+.case-size input,
+.pair-dials input[type="range"],
+.dial input {
+  width: 100%;
+  accent-color: var(--color-accent);
+}
+.case-shelves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 1.2rem 0 1.4rem;
+}
+.case-shelves button {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  background: transparent;
+  font: 500 var(--step--1) / 1 var(--font-label);
+  letter-spacing: 0.05em;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+.case-shelves button small {
+  color: var(--color-ink-faint);
+  font-variant-numeric: lining-nums;
+}
+.case-shelves button[aria-pressed="true"] {
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-paper);
+}
+.case-shelves button[aria-pressed="true"] small {
+  color: inherit;
+  opacity: 0.7;
+}
+
+.case-drawers {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  gap: 1px;
+  background: var(--color-rule);
+  border: 1px solid var(--color-rule);
+}
+.drawer {
+  position: relative;
+  background: var(--color-paper);
+  animation: rise 260ms var(--ease-quill) both;
+}
+.drawer-open {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: 100%;
+  height: 100%;
+  min-height: 10rem;
+  padding: 0.85rem 1.1rem 1.2rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.drawer-open:hover {
+  background: var(--color-paper-raised);
+}
+/* the brass label on a type-case drawer */
+.drawer-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px dotted var(--color-rule);
+  font: 500 var(--step--1) / 1.2 var(--font-label);
+  letter-spacing: 0.08em;
+}
+.drawer-label small {
+  color: var(--color-ink-faint);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+.drawer-specimen {
+  margin: 0.7rem 0 0;
+  line-height: 1.12;
+  overflow-wrap: anywhere;
+  color: var(--color-ink);
+}
+.drawer-add {
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 0.4rem;
+  min-height: 10rem;
+  padding: 1rem 1.1rem;
+  cursor: pointer;
+  background: repeating-linear-gradient(135deg, transparent 0 9px, color-mix(in oklab, var(--color-ink) 3%, transparent) 9px 10px), var(--color-paper);
+  color: var(--color-ink-soft);
+}
+.drawer-add > .sigil {
+  color: var(--color-accent);
+}
+.drawer-add-title {
+  font: 400 var(--step-1) / 1.1 var(--font-display);
+  color: var(--color-ink);
+}
+.drawer-add.is-over {
+  outline: 2px dashed var(--color-accent);
+  outline-offset: -6px;
+  background: var(--color-accent-wash);
+}
+.drawer-add-forge {
+  font-style: italic;
+  color: var(--color-accent);
+}
+
+/* proof sheet */
+.proof-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: color-mix(in oklab, var(--color-paper-sunk) 55%, transparent);
+  backdrop-filter: blur(2px);
+  animation: fade 160ms both;
+}
+.proof-sheet {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(46rem, 100%);
+  overflow-y: auto;
+  padding: 2rem clamp(1rem, 4vw, 2.6rem) 3rem;
+  background: var(--color-paper-raised) var(--paper-laid);
+  border-left: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-leaf);
+  animation: slide-in 260ms var(--ease-quill) both;
+}
+.proof-close {
+  position: sticky;
+  top: 0;
+  float: right;
+}
+.proof-kicker {
+  margin: 0;
+  font: 500 0.75rem / 1 var(--font-label);
+  letter-spacing: 0.12em;
+  color: var(--color-accent);
+}
+.proof-name {
+  margin: 0.4rem 0 0.8rem;
+  font-size: clamp(2.6rem, 7vw, 4.6rem);
+  font-weight: 400;
+  line-height: 1;
+}
+.proof-use {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.proof-use button,
+.pair-keep button,
+.hands-new button {
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  background: var(--color-paper);
+  font: 500 var(--step--1) / 1 var(--font-label);
+  letter-spacing: 0.05em;
+  cursor: pointer;
+}
+.proof-use button:hover,
+.pair-keep button:hover:not(:disabled),
+.hands-new button:hover:not(:disabled) {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+.proof-section {
+  margin-top: 2rem;
+}
+.proof-section h3 {
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.8rem;
+  border-bottom: 1px solid var(--color-rule);
+}
+.proof-faces {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.proof-faces li {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+}
+.proof-face-sample {
+  font-size: 1.9rem;
+  line-height: 1.2;
+}
+.proof-faces small,
+.proof-fall small {
+  font: 500 0.7rem / 1 var(--font-label);
+  letter-spacing: 0.06em;
+  color: var(--color-ink-faint);
+  font-variant-numeric: lining-nums;
+}
+.proof-fall {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.35rem;
+  line-height: 1.15;
+}
+.proof-fall span {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.proof-glyphs {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3rem, 1fr));
+  border-top: 1px solid var(--color-rule);
+  border-left: 1px solid var(--color-rule);
+}
+.proof-glyphs span {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  font-size: 1.7rem;
+  border-right: 1px solid var(--color-rule);
+  border-bottom: 1px solid var(--color-rule);
+}
+.proof-ligatures {
+  margin: 1rem 0 0;
+  font-size: 1.8rem;
+  font-variant-ligatures: common-ligatures discretionary-ligatures;
+}
+.proof-foot {
+  margin-top: 2rem;
+  font-size: var(--step--1);
+  font-style: italic;
+}
+
+/* ── pairing ─────────────────────────────────────────────────────────── */
+.pairing {
+  display: grid;
+  grid-template-columns: 17rem minmax(0, 1fr) 16rem;
+  grid-template-areas: "controls leaf shelf";
+  gap: 2rem;
+  align-items: start;
+}
+.pair-controls {
+  grid-area: controls;
+  display: grid;
+  gap: 1.6rem;
+  position: sticky;
+  top: 1rem;
+}
+.pair-slots,
+.pair-dials {
+  display: grid;
+  gap: 0.9rem;
+}
+.pair-slot {
+  display: grid;
+  gap: 0.3rem;
+}
+.pair-pick > .tool {
+  width: 100%;
+  height: auto;
+  min-height: 2.6rem;
+  justify-content: flex-start;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-rule);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  text-align: left;
+}
+.pair-pick > .tool[aria-expanded="true"] {
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+  border-color: var(--color-accent);
+}
+.pair-face {
+  font-size: 1.2rem;
+  line-height: 1.15;
+}
+.pair-dials label {
+  display: grid;
+  gap: 0.25rem;
+}
+.pair-hand {
+  display: grid;
+  gap: 0.4rem;
+  justify-items: start;
+}
+.pair-hand .muted {
+  margin: 0;
+  font-size: var(--step--1);
+  font-style: italic;
+}
+
+/* the proof leaf: a page set in the pairing being composed */
+.pair-leaf {
+  grid-area: leaf;
+  position: relative;
+  padding: clamp(1.4rem, 4vw, 3.2rem) clamp(1.2rem, 4vw, 3.4rem) 2.6rem;
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-leaf);
+  font: 400 var(--pair-body-size) / var(--pair-leading) var(--pair-body);
+}
+.pair-leaf::before {
+  /* the press's register marks */
+  content: "";
+  position: absolute;
+  inset: 0.7rem;
+  border: 1px solid color-mix(in oklab, var(--color-rule) 50%, transparent);
+  pointer-events: none;
+}
+.pair-kicker,
+.pair-meta,
+.pair-label-row {
+  font-family: var(--pair-label);
+  font-size: 0.78em;
+  letter-spacing: 0.1em;
+  color: var(--color-ink-soft);
+}
+.pair-kicker {
+  margin: 0;
+  color: var(--color-accent);
+}
+.pair-title {
+  margin: 0.3em 0 0.2em;
+  font: 400 calc(var(--pair-body-size) * var(--pair-scale)) / 1.04 var(--pair-display);
+  letter-spacing: -0.005em;
+  overflow-wrap: anywhere;
+}
+.pair-meta {
+  margin: 0 0 1.6em;
+  text-transform: lowercase;
+  font-variant: small-caps;
+}
+.pair-body {
+  max-width: 34em;
+}
+.pair-body p {
+  margin: 0;
+  text-indent: 1.4em;
+  hyphens: auto;
+}
+.pair-body p.has-drop {
+  text-indent: 0;
+}
+.pair-body p.has-drop::first-letter {
+  float: left;
+  margin: 0.06em 0.12em 0 0;
+  font: 400 calc(var(--pair-leading) * 3em) / 0.8 var(--pair-display);
+  color: var(--color-accent);
+}
+.pair-note {
+  max-width: 24em;
+  margin: 1.6em 0 0 auto;
+  padding-left: 0.8em;
+  border-left: 1px solid var(--color-rule);
+  font-size: 0.82em;
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--color-ink-soft);
+}
+.pair-note-mark {
+  color: var(--color-accent);
+  font-style: normal;
+}
+.pair-sub {
+  margin: 1.4em 0 0.3em;
+  font: 400 calc(var(--pair-body-size) * var(--pair-scale) * 0.5) / 1.1 var(--pair-display);
+}
+.pair-small {
+  margin: 0;
+}
+.pair-label-row {
+  font-variant: small-caps;
+}
+
+.pair-shelf {
+  grid-area: shelf;
+  display: grid;
+  gap: 1.8rem;
+}
+.pair-shelf h3 {
+  margin-bottom: 0.6rem;
+}
+.pair-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.3rem;
+}
+.pair-list li {
+  position: relative;
+}
+.pair-list li > button:first-child {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.pair-list li > button:first-child:hover {
+  background: var(--color-paper-raised);
+  border-color: var(--color-rule);
+}
+.pair-list li > button[aria-pressed="true"] {
+  background: var(--color-paper-raised);
+  border-color: var(--color-accent);
+}
+.pair-list-name {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+.pair-list-body {
+  font-size: 0.86rem;
+  line-height: 1.3;
+  color: var(--color-ink-soft);
+}
+.pair-kept > button:first-child {
+  padding-right: 2.4rem;
+}
+.pair-forget {
+  position: absolute;
+  top: 0.3rem;
+  right: 0.2rem;
+  font-size: 0.8rem;
+}
+.pair-keep {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+}
+
+/* ── scriptorium ─────────────────────────────────────────────────────── */
+.hands-intro {
+  max-width: 40rem;
+}
+.hands-intro p {
+  margin-top: 0;
+}
+.hands-new {
+  display: flex;
+  gap: 0.5rem;
+}
+.hands-list {
+  list-style: none;
+  margin: 2rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 18rem), 1fr));
+  gap: 0.8rem;
+}
+.hand-card {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.2rem 0.7rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  background: var(--color-paper-raised);
+  text-decoration: none;
+  box-shadow: var(--shadow-leaf);
+}
+.hand-card .sigil {
+  color: var(--color-accent);
+  grid-row: span 2;
+}
+.hand-card-name {
+  font: 400 var(--step-2) / 1.05 var(--font-display);
+}
+.hand-card small {
+  font: 500 0.72rem / 1.2 var(--font-label);
+  letter-spacing: 0.06em;
+  color: var(--color-ink-faint);
+}
+.hand-card:hover {
+  border-color: var(--color-accent);
+}
+
+.hand-desk {
+  display: grid;
+  grid-template-columns: 9.5rem minmax(0, 1fr) 16rem;
+  gap: 1.4rem;
+  align-items: start;
+}
+.hand-desk.is-loading {
+  min-height: 60vh;
+}
+.glyph-palette {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+  max-height: calc(100dvh - 10rem);
+  overflow-y: auto;
+  position: sticky;
+  top: 1rem;
+  padding-right: 2px;
+}
+.palette-cell {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: 0.15rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 2px;
+  background: var(--color-paper);
+  color: var(--color-ink-faint);
+  font: 400 1.05rem / 1 var(--font-body);
+  cursor: pointer;
+}
+.palette-cell svg {
+  width: 100%;
+  height: 100%;
+  fill: var(--color-ink);
+}
+.palette-cell.is-drawn {
+  background: var(--color-paper-raised);
+}
+.palette-cell:hover {
+  border-color: var(--color-ink-faint);
+}
+.palette-cell.is-current {
+  border-color: var(--color-accent);
+  box-shadow: inset 0 0 0 1px var(--color-accent);
+  color: var(--color-accent);
+}
+.palette-add input {
+  width: 100%;
+  aspect-ratio: 1;
+  border: 1px dashed var(--color-rule);
+  border-radius: 2px;
+  background: transparent;
+  text-align: center;
+  font: 400 1.05rem / 1 var(--font-body);
+}
+
+.hand-sheet-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin-bottom: 0.5rem;
+}
+.hand-current {
+  font-size: var(--step-1);
+}
+.hand-current .sc {
+  font: 500 0.75rem / 1 var(--font-label);
+  letter-spacing: 0.1em;
+  color: var(--color-ink-faint);
+}
+.hand-current b {
+  font: 400 1.6em / 1 var(--font-display);
+  color: var(--color-accent);
+  margin: 0 0.15em;
+}
+.hand-current small {
+  font: 500 0.7rem / 1 var(--font-label);
+  color: var(--color-ink-faint);
+}
+.hand-tools {
+  display: flex;
+  gap: 0.15rem;
+}
+.hand-tools .tool:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.hand-tools .tool .sigil {
+  width: 1.2em;
+  height: 1.2em;
+}
+
+/* the practice sheet */
+.hand-sheet {
+  display: block;
+  width: 100%;
+  height: min(62dvh, 40rem);
+  background: var(--color-paper-raised);
+  border: 1px solid var(--color-rule);
+  box-shadow: var(--shadow-leaf);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: crosshair;
+}
+.hand-sheet.uses-eraser {
+  cursor: cell;
+}
+.sheet-slants line {
+  stroke: color-mix(in oklab, var(--color-accent) 16%, transparent);
+  stroke-width: 1.5;
+}
+.sheet-rules line {
+  stroke: color-mix(in oklab, var(--color-accent) 45%, transparent);
+  stroke-width: 1.6;
+}
+.sheet-rules .is-faint line {
+  stroke-dasharray: 10 12;
+  stroke: color-mix(in oklab, var(--color-accent) 30%, transparent);
+}
+.sheet-rules .is-x line {
+  stroke: color-mix(in oklab, var(--color-accent-2) 70%, transparent);
+}
+.sheet-rules .is-base line {
+  stroke: var(--color-accent);
+  stroke-width: 3;
+}
+.sheet-rules text {
+  font: 500 22px / 1 var(--font-label);
+  letter-spacing: 0.08em;
+  fill: color-mix(in oklab, var(--color-accent) 65%, transparent);
+}
+.sheet-ghost {
+  fill: color-mix(in oklab, var(--color-ink) 9%, transparent);
+  pointer-events: none;
+}
+.sheet-bearings line {
+  stroke: var(--color-accent-2);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 8;
+}
+.sheet-ink {
+  fill: var(--color-ink);
+  fill-rule: nonzero;
+}
+.sheet-ink.is-wet {
+  fill: color-mix(in oklab, var(--color-ink) 78%, var(--color-accent-2));
+}
+.sheet-hint {
+  font: italic 400 46px / 1 var(--font-body);
+  fill: var(--color-ink-faint);
+  pointer-events: none;
+}
+
+.hand-proof {
+  margin-top: 1rem;
+}
+.hand-proof input {
+  font-style: italic;
+}
+.hand-proof-strip {
+  overflow-x: auto;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--color-rule);
+}
+.hand-proof-strip svg {
+  display: block;
+  height: 5rem;
+  max-width: none;
+}
+.proof-ink {
+  fill: var(--color-ink);
+  cursor: pointer;
+}
+.proof-ink:hover {
+  fill: var(--color-accent);
+}
+.proof-missing {
+  cursor: pointer;
+}
+.proof-missing rect {
+  fill: none;
+  stroke: var(--color-rule);
+  stroke-width: 12;
+  stroke-dasharray: 30 26;
+}
+.proof-missing text {
+  font: 400 420px / 1 var(--font-body);
+  fill: var(--color-ink-faint);
+}
+.proof-missing:hover rect {
+  stroke: var(--color-accent);
+}
+.cast-proof {
+  margin: 1rem 0 0;
+  font-size: 2.4rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.hand-bench {
+  display: grid;
+  gap: 1.3rem;
+}
+.family-name {
+  display: grid;
+  gap: 0.3rem;
+}
+.family-name input {
+  font: 400 var(--step-1) / 1.1 var(--font-display);
+}
+.bench-section {
+  display: grid;
+  gap: 0.55rem;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--color-rule);
+}
+.bench-note {
+  margin: 0;
+  font-size: var(--step--1);
+  font-style: italic;
+  line-height: 1.4;
+  color: var(--color-ink-faint);
+}
+.nib-kinds {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.3rem;
+}
+.nib-kinds button {
+  display: grid;
+  justify-items: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.2rem 0.4rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  background: var(--color-paper);
+  font: 500 0.68rem / 1.1 var(--font-label);
+  letter-spacing: 0.04em;
+  color: var(--color-ink-soft);
+  cursor: pointer;
+}
+.nib-kinds button[aria-checked="true"] {
+  border-color: var(--color-accent);
+  background: var(--color-paper-raised);
+  color: var(--color-ink);
+}
+.nib-swatch {
+  width: 100%;
+  height: 3rem;
+  fill: var(--color-ink);
+}
+.dial {
+  display: grid;
+  gap: 0.1rem;
+  font: 500 0.78rem / 1.2 var(--font-label);
+  letter-spacing: 0.04em;
+  color: var(--color-ink-soft);
+}
+.dial span {
+  display: flex;
+  justify-content: space-between;
+}
+.dial output {
+  color: var(--color-ink);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+.bench-glyph {
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.6rem;
+  border: 1px dotted var(--color-rule);
+  border-radius: var(--radius);
+}
+.bench-glyph > .sc {
+  font: 500 0.7rem / 1 var(--font-label);
+  letter-spacing: 0.1em;
+  color: var(--color-accent-2);
+}
+.bench-cast {
+  justify-items: start;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(2.5rem);
+    opacity: 0;
+  }
+}
+
+/* ── narrow ──────────────────────────────────────────────────────────── */
+@media (max-width: 1180px) {
+  .pairing {
+    grid-template-columns: 16rem minmax(0, 1fr);
+    grid-template-areas: "controls leaf" "shelf leaf";
+  }
+  .hand-desk {
+    grid-template-columns: 8rem minmax(0, 1fr);
+  }
+  .hand-bench {
+    grid-column: 1 / -1;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+    align-items: start;
+  }
+  .hand-bench .bench-section {
+    border-top: 0;
+    padding-top: 0;
+  }
+}
+@media (max-width: 860px) {
+  .case-bench {
+    grid-template-columns: 1fr 1fr;
+  }
+  .case-specimen {
+    grid-column: 1 / -1;
+  }
+  .pairing {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas: "controls" "leaf" "shelf";
+  }
+  .pair-controls {
+    position: static;
+  }
+  .hand-desk {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .glyph-palette {
+    position: static;
+    grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+    max-height: 9.5rem;
+  }
+  .hand-sheet {
+    height: min(58dvh, 30rem);
+  }
+}
+@media (pointer: coarse) {
+  .palette-cell {
+    min-height: 44px;
+  }
+  .case-shelves button,
+  .proof-use button {
+    min-height: 44px;
+  }
+}

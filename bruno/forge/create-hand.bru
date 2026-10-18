@@ -1,0 +1,39 @@
+meta {
+  name: Create hand
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/hands
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "family": "{{handFamily}}"
+  }
+}
+
+script:pre-request {
+  bru.setVar("handFamily", "Bruno Probe " + Date.now());
+}
+
+script:post-response {
+  bru.setVar("handId", res.body.id);
+  bru.setVar("hand", res.body);
+}
+
+assert {
+  res.status: eq 201
+  res.body.format: eq 1
+  res.body.nib.kind: eq broad
+}
+
+docs {
+  `{ family }` (≤60 chars). Writes `world/forge/<id>.json` with the default nib, ruling and spacing.
+  Emits `{type:"hand", op:"upsert"}`.
+
+  A hand's coordinates are font units: 1000 to the em, y up, 0 on the baseline.
+}

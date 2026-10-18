@@ -2,10 +2,11 @@
 
 Resume point. Append-only phase log below; the "Now" block is rewritten each phase.
 
-## Now (2026-10-17)
+## Now (2026-10-18)
 
-Phases 1–4 done and verified. **Next: phase 5, the font forge** (library and
-pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fonts/`).
+Phases 1–5 done and verified. **Next: phase 6**, tutorial modules from mazze's
+workshopped excerpts, plus prefab assets. A design-system artifact (agelace's
+tokens, type and core components) was offered for mazze to workshop.
 
 ## Plan
 
@@ -22,8 +23,10 @@ pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fon
    wikilinks / board threads / board membership as strands), local weave per
    entry, Strands (backlinks) panel on every entry, seal cards on boards, kind
    sigils in the rail
-5. Font forge: library view and pairing; then stylus glyph drawing → opentype.js →
-   `.otf` written into `world/fonts/`
+5. ✅ The Forge: type case (specimens, proof sheet, drop to add), pairing (three
+   roles, proof leaf from the world's own prose, curated + kept pairings, "the
+   world's hand" applied app-wide), Scriptorium (broad/quill/round nibs, stylus
+   pressure + eraser end + palm rejection, undo, live proof, cast → `.otf`)
 6. Tutorial modules from mazze's workshopped excerpts (Merchants of War / How to
    Steal the Moon), plus prefab assets
 
@@ -52,6 +55,23 @@ pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fon
 - amd64 image under emulation: health check, create, file on host, restart, still there.
 - No console errors. 390 px width: no sideways scroll, and margin notes become
   endnotes.
+
+## Verified (phase 5)
+
+- Server 28/28 (new: geometry: union, counters as holes under every nib, broad
+  nib thick/thin by direction, pressure spreads a stylus's broad nib; world
+  patch keeps the epigraph; hand create → draw → cast → opentype.js reads the
+  family, glyph, bearings, word space, weight 400 → trash). App 18/18.
+  Typecheck clean. Bruno 26/26 headless (`scripts/api-check.sh`).
+- Headless Chromium (Playwright 1.49.1 container; neither browser extension was
+  connected) against a test container on :8081: type case renders 15 families;
+  proof sheet; "Pair as display" carries over; set and return the world's hand
+  (the `--font-*` tokens change and revert); keep a pairing; draw "How to steal
+  the Moon" with the mouse; Ctrl-Z / Ctrl-Shift-Z; eraser tool and undo of it;
+  synthetic stylus (pressure 0.2→0.9 saved with `pen: true`, palm touch ignored,
+  eraser end removes a stroke); nib change re-inks; cast → `document.fonts`
+  loads `Moonthief`; it appears on "Your own"; 500px wide: no horizontal
+  overflow on any forge room; dark lamp. No console errors.
 
 ## Verified (phase 4)
 
@@ -90,6 +110,8 @@ pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fon
   secure context. Local HTTPS may be needed for the forge.
 - Margin-note stacking uses heights measured before auto-grow, so notes can
   overlap slightly when several sit close together.
+- Forge: stylus tested with synthetic pen events only, not real hardware.
+  Kerning is not cast (spacing is per-glyph side bearings only).
 - Board: not yet tested with a real stylus (Windows Ink / Apple Pencil). Pen
   pressure and the flip-to-erase button are wired to Pointer Events but
   untested on hardware.
@@ -103,6 +125,14 @@ pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fon
   so exposure is low, but `--share` widens it.
 
 ## Log
+
+- 2026-10-18 — Phase 5 built. Caught: PATCH /api/world blanked the epigraph
+  (zod default under `.partial()`), a live bug since phase 1; font family names
+  were never read from font files (opentype.js 2.x nests names by platform), so
+  dropped fonts were named from their filenames; polygon-clipping failed on
+  broad-nib O's (fixed by snapping + incremental fold); "Pair as display" was
+  overwritten by the pairing room's first-open seed; cast fonts claimed weight
+  500 (opentype.js default).
 
 - 2026-10-17 — API mapped as a Bruno collection (`bruno/`, 20 requests, every
   route documented) plus `scripts/api-check.sh` (headless, throwaway world):

@@ -1,0 +1,26 @@
+meta {
+  name: Get world
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/world
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.format: eq 1
+  res.body.name: isString
+}
+
+script:post-response {
+  bru.setVar("worldName", res.body.name);
+  bru.setVar("worldEpigraph", res.body.epigraph);
+}
+
+docs {
+  `world.json`: `{ name, epigraph, format: 1 }`.
+}

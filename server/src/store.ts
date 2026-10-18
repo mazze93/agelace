@@ -20,9 +20,10 @@ import {
  *
  *   world.json            name, epigraph, format version
  *   entries/<id>.json     one Entry per file (lossless rich doc)
- *   canvases/<id>.json    canvas boards (phase 3)
+ *   canvases/<id>.yjs     boards (Yjs docs), plus a write-only <id>.canvas export
  *   assets/               images, maps
  *   fonts/                user fonts — drop a file in, it appears in the forge
+ *   forge/<id>.json       hands drawn in the forge (cast into fonts/)
  *   .trash/               deleted entries land here, never hard-deleted
  *
  * The in-memory index is a cache; the folder is the truth. `invalidate()`
@@ -49,7 +50,7 @@ export class WorldStore {
   }
 
   async init(seed?: (store: WorldStore) => Promise<void>): Promise<void> {
-    for (const d of ["entries", "canvases", "assets", "fonts", ".trash"]) {
+    for (const d of ["entries", "canvases", "assets", "fonts", "forge", ".trash"]) {
       await mkdir(join(this.root, d), { recursive: true });
     }
     const fresh = !(await exists(join(this.root, "world.json")));

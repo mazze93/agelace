@@ -27,6 +27,8 @@ docs {
   ## Not covered by requests
 
   - `GET /api/events`: Bruno would wait on the stream forever. Try `curl -N localhost:8080/api/events`.
+  - The forge requests create a probe hand, cast it, and delete the hand. The cast font
+    (`Bruno-Probe-….otf`) stays in `world/fonts/`; against your real world, delete it by hand.
   - `POST /api/assets` and `POST /api/fonts`: binary uploads. Send a file body with
     `content-type: application/octet-stream` and `?name=map.png` / `?name=MyFace.otf`.
   - Static files: `/fonts/builtin/<file>`, `/fonts/world/<file>`, `/assets/<file>`.

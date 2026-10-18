@@ -1,0 +1,29 @@
+meta {
+  name: Cast hand
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/hands/{{handId}}/cast
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 201
+  res.body.glyphs: eq 1
+  res.body.file: endsWith .otf
+}
+
+script:post-response {
+  bru.setVar("castFile", res.body.file);
+}
+
+docs {
+  Builds an OpenType (CFF) font from the hand and writes it to `world/fonts/<Family>.otf`,
+  replacing any earlier cast. Letters with no ink are left out, so text falls back to the
+  page's face. Emits `{type:"fonts"}`.
+
+  400 if nothing is drawn yet; 409 if the family name is a built-in face's.
+}

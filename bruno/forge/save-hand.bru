@@ -1,0 +1,33 @@
+meta {
+  name: Save hand (draw an I)
+  type: http
+  seq: 3
+}
+
+put {
+  url: {{baseUrl}}/api/hands/{{handId}}
+  body: json
+  auth: none
+}
+
+script:pre-request {
+  const { id, format, created, updated, ...hand } = bru.getVar("hand");
+  const pts = [];
+  for (let y = 0; y <= 690; y += 15) pts.push(300, y, 0.5);
+  req.setBody({ ...hand, glyphs: { I: { strokes: [{ pts }] } } });
+}
+
+assert {
+  res.status: eq 200
+  res.body.glyphs.I.strokes: isArray
+}
+
+docs {
+  The whole hand except `id`, `format`, `created`, `updated` (a `HandWrite`): `family`, `nib`,
+  `metrics`, `spacing`, `space`, `glyphs`. Last write wins; the app saves the whole hand after each
+  stroke settles.
+
+  `glyphs` maps ONE character to `{ strokes: [{ pts: [x, y, pressure, …], pen? }], left?, right? }`.
+  `pen: true` marks real stylus pressure. `left`/`right` override the hand's side bearing.
+  A key that isn't exactly one character is a 400.
+}

@@ -4,6 +4,8 @@ import { api, subscribe } from "./api";
 import { CanvasPage } from "./canvas/CanvasPage";
 import { Colophon } from "./Colophon";
 import { EntryPage } from "./EntryPage";
+import { ForgePage, type ForgeRoom } from "./forge/ForgePage";
+import { applyTypeset } from "./forge/typeset";
 import { PatternPage } from "./pattern/PatternPage";
 import { refreshFonts } from "./fonts";
 import { Sigil } from "./Sigil";
@@ -15,6 +17,7 @@ type Route =
   | { page: "entry"; id: string }
   | { page: "canvas"; id: string }
   | { page: "pattern"; focus: string | null }
+  | { page: "forge"; at: ForgeRoom }
   | { page: "colophon" };
 
 function parseRoute(hash: string): Route {
@@ -24,6 +27,8 @@ function parseRoute(hash: string): Route {
   if (c?.[1]) return { page: "canvas", id: c[1] };
   const p = /^#\/pattern(?:\/([a-z0-9-]+))?$/.exec(hash);
   if (p) return { page: "pattern", focus: p[1] ?? null };
+  const f = /^#\/forge(?:\/(pairing|hands)(?:\/([a-z0-9-]+))?)?$/.exec(hash);
+  if (f) return { page: "forge", at: f[2] ? { room: "hand", id: f[2] } : f[1] === "pairing" ? { room: "pairing" } : f[1] === "hands" ? { room: "hands" } : { room: "case" } };
   if (hash === "#/colophon") return { page: "colophon" };
   return { page: "home" };
 }
@@ -69,10 +74,13 @@ export function App() {
     document.title = meta ? `${meta.name} · agelace` : "agelace";
   }, [meta]);
 
+  const typeset = meta?.typeset;
+  useEffect(() => applyTypeset(typeset), [typeset?.display, typeset?.body, typeset?.label]);
+
   return (
     <div className="shell">
       <div className="atmosphere" aria-hidden="true" />
-      <IndexRail current={route.page === "entry" || route.page === "canvas" ? route.id : route.page === "pattern" ? "pattern" : null} />
+      <IndexRail current={route.page === "entry" || route.page === "canvas" ? route.id : route.page === "pattern" || route.page === "forge" ? route.page : null} />
       <main className={`desk${route.page === "canvas" || route.page === "pattern" ? " desk-board" : ""}`} id="main">
         {route.page === "entry" ? (
           <EntryPage id={route.id} />
@@ -80,6 +88,8 @@ export function App() {
           <CanvasPage id={route.id} />
         ) : route.page === "pattern" ? (
           <PatternPage focus={route.focus} />
+        ) : route.page === "forge" ? (
+          <ForgePage at={route.at} />
         ) : route.page === "colophon" ? (
           <Colophon />
         ) : (
@@ -131,6 +141,10 @@ function IndexRail({ current }: { current: string | null }) {
         <Sigil name="spider-web" />
         <span>The Pattern</span>
         <small>{entries.length}</small>
+      </a>
+      <a className="rail-pattern rail-forge" href="#/forge" aria-current={current === "forge" ? "page" : undefined}>
+        <Sigil name="anvil" />
+        <span>The Forge</span>
       </a>
       <div className="rail-scroll">
         {canvases.length > 0 && (

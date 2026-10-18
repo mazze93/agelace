@@ -1,0 +1,33 @@
+meta {
+  name: Patch world
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{baseUrl}}/api/world
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "name": "{{worldName}}",
+    "epigraph": "{{worldEpigraph}}"
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.name: eq {{worldName}}
+}
+
+docs {
+  Partial update (a `WorldPatch`): `name` (1–120 chars), `epigraph` (≤400),
+  `typeset` (`{display?, body?, label?}`: the world's hand, applied app-wide; `{}` returns to the
+  archive's faces) and `pairings` (saved from the forge, ≤60). Fields left out are untouched.
+  Emits `{type:"world"}`.
+
+  This request writes back the values *Get world* just read, so it changes nothing.
+  Run *Get world* first.
+}

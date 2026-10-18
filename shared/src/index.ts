@@ -67,12 +67,107 @@ export type EntryPatch = z.infer<typeof EntryPatch>;
 /** Lightweight listing row — no document body. */
 export type EntrySummary = Omit<Entry, "doc"> & { links: Id[]; excerpt: string };
 
-export const WorldMeta = z.object({
-  name: z.string().min(1).max(120),
-  epigraph: z.string().max(400).default(""),
-  format: z.literal(1),
+/** Families for the three typographic roles. Empty or absent = the archive's own face. */
+export const Typeset = z.object({
+  display: z.string().max(120).optional(),
+  body: z.string().max(120).optional(),
+  label: z.string().max(120).optional(),
 });
+export type Typeset = z.infer<typeof Typeset>;
+
+export const Pairing = Typeset.extend({ name: z.string().min(1).max(80) });
+export type Pairing = z.infer<typeof Pairing>;
+
+const worldFields = {
+  name: z.string().min(1).max(120),
+  epigraph: z.string().max(400),
+  format: z.literal(1),
+  /** the world's hand: applied to the whole app */
+  typeset: Typeset.optional(),
+  /** pairings saved from the forge */
+  pairings: z.array(Pairing).max(60).optional(),
+};
+export const WorldMeta = z.object({ ...worldFields, epigraph: worldFields.epigraph.default("") });
 export type WorldMeta = z.infer<typeof WorldMeta>;
+// Built from the default-free fields: a .partial() of WorldMeta would fill in
+// epigraph: "" on every PATCH that leaves it out, blanking the real one.
+export const WorldPatch = z.object(worldFields).omit({ format: true }).partial();
+export type WorldPatch = z.infer<typeof WorldPatch>;
+
+// ── The forge: hands (user-drawn typefaces) ──────────────────────────────
+// Coordinates are font units: 1000 to the em, y up, 0 at the baseline. A
+// glyph's horizontal position is free; casting places it by its ink.
+
+export const NibKind = z.enum([
+  "quill", // pressure-led, tapering (perfect-freehand)
+  "broad", // broad-edge chisel held at a fixed angle: thick and thin by direction
+  "round", // monoline
+]);
+export type NibKind = z.infer<typeof NibKind>;
+
+export const Nib = z.object({
+  kind: NibKind,
+  /** width in font units */
+  size: z.number().min(4).max(240),
+  /** broad-edge angle in degrees, counter-clockwise from the baseline */
+  angle: z.number().min(-90).max(90),
+});
+export type Nib = z.infer<typeof Nib>;
+
+export const GlyphStroke = z.object({
+  /** flat [x, y, pressure, x, y, pressure, …] */
+  pts: z.array(z.number()).max(12_000),
+  /** true when pressure came from a real pen, not simulated */
+  pen: z.boolean().optional(),
+});
+export type GlyphStroke = z.infer<typeof GlyphStroke>;
+
+export const Glyph = z.object({
+  strokes: z.array(GlyphStroke).max(300),
+  /** side-bearing overrides; absent = the hand's spacing */
+  left: z.number().int().min(-400).max(600).optional(),
+  right: z.number().int().min(-400).max(600).optional(),
+});
+export type Glyph = z.infer<typeof Glyph>;
+
+export const HandMetrics = z.object({
+  ascender: z.number().int().min(500).max(1200),
+  descender: z.number().int().min(-600).max(0),
+  capHeight: z.number().int().min(200).max(1100),
+  xHeight: z.number().int().min(100).max(900),
+});
+export type HandMetrics = z.infer<typeof HandMetrics>;
+
+/** One character (one code point) → its glyph. */
+const GlyphKey = z.string().refine((k) => [...k].length === 1 && k !== " ", "one character per glyph");
+
+export const Hand = z.object({
+  id: Id,
+  family: z.string().trim().min(1).max(60),
+  format: z.literal(1),
+  nib: Nib,
+  metrics: HandMetrics,
+  /** default side bearing, font units */
+  spacing: z.number().int().min(0).max(400),
+  /** advance of the space character */
+  space: z.number().int().min(50).max(1000),
+  glyphs: z.record(GlyphKey, Glyph),
+  created: z.string(),
+  updated: z.string(),
+});
+export type Hand = z.infer<typeof Hand>;
+
+export const HandWrite = Hand.omit({ id: true, format: true, created: true, updated: true });
+export type HandWrite = z.infer<typeof HandWrite>;
+
+export interface HandSummary {
+  id: Id;
+  family: string;
+  glyphs: number;
+  updated: string;
+  /** file in world/fonts once cast */
+  cast?: string;
+}
 
 export interface FontFaceInfo {
   /** CSS family name as it should be used in font-family */
@@ -97,6 +192,7 @@ export interface FontFaceInfo {
 export type WorldEvent =
   | { type: "entry"; id: Id; op: "upsert" | "delete"; by?: string }
   | { type: "canvas"; id: Id; op: "upsert" | "delete"; by?: string }
+  | { type: "hand"; id: Id; op: "upsert" | "delete"; by?: string }
   | { type: "fonts"; by?: string }
   | { type: "world"; by?: string };
 
@@ -166,3 +262,5 @@ export function slugify(title: string): string {
 }
 
 export const emptyDoc = (): RichDoc => ({ type: "doc", content: [{ type: "paragraph" }] });
+
+export * from "./glyph.js";

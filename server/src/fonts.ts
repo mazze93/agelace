@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile } from "node:fs/promises";
+import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import opentype from "opentype.js";
 import type { FontFaceInfo } from "@agelace/shared";
@@ -57,6 +57,8 @@ export async function listWorldFonts(dir: string): Promise<FontFaceInfo[]> {
     if (file.startsWith(".") || !isFontFile(file)) continue;
     const ext = extname(file).toLowerCase();
     const buf = await readFile(join(dir, file));
+    // A recast hand keeps its filename; the version makes the browser fetch the new bytes.
+    const v = Math.round((await stat(join(dir, file))).mtimeMs).toString(36);
     const key = `${file}:${buf.byteLength}`;
     let meta = nameCache.get(key);
     if (!meta) {
@@ -66,7 +68,7 @@ export async function listWorldFonts(dir: string): Promise<FontFaceInfo[]> {
     out.push({
       ...meta,
       file,
-      url: `/fonts/world/${encodeURIComponent(file)}`,
+      url: `/fonts/world/${encodeURIComponent(file)}?v=${v}`,
       format: FORMATS[ext]!,
       source: "world",
     });
@@ -80,11 +82,9 @@ function describe(file: string, ext: string, buf: Buffer): Pick<FontFaceInfo, "f
   try {
     const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
     const font = opentype.parse(ab);
-    const names = font.names as unknown as Record<string, Record<string, string> | undefined>;
-    const family =
-      names["typographicFamily"]?.["en"] ?? names["preferredFamily"]?.["en"] ?? names["fontFamily"]?.["en"];
+    const family = fontName(font.names, "typographicFamily") ?? fontName(font.names, "preferredFamily") ?? fontName(font.names, "fontFamily");
     const os2 = font.tables["os2"] as { usWeightClass?: number; fsSelection?: number } | undefined;
-    const italic = ((os2?.fsSelection ?? 0) & 1) === 1 || /italic|oblique/i.test(names["fontSubfamily"]?.["en"] ?? "");
+    const italic = ((os2?.fsSelection ?? 0) & 1) === 1 || /italic|oblique/i.test(fontName(font.names, "fontSubfamily") ?? "");
     return {
       family: family?.trim() || fallback.family,
       weight: String(os2?.usWeightClass ?? fallback.weight),
@@ -93,6 +93,21 @@ function describe(file: string, ext: string, buf: Buffer): Pick<FontFaceInfo, "f
   } catch {
     return fallback;
   }
+}
+
+/**
+ * opentype.js 2.x files names per platform (`names.windows.fontFamily.en`);
+ * 1.x kept them flat. Read either, preferring Windows, then Unicode, then Mac.
+ */
+export function fontName(names: unknown, key: string): string | undefined {
+  type Table = Record<string, unknown> | undefined;
+  const n = names as Record<string, unknown>;
+  for (const table of [n["windows"], n["unicode"], n["macintosh"], n] as Table[]) {
+    const entry = table?.[key] as Record<string, unknown> | undefined;
+    const value = entry && typeof entry === "object" ? (entry["en"] ?? Object.values(entry)[0]) : undefined;
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return undefined;
 }
 
 const WEIGHT_WORDS: [RegExp, string][] = [

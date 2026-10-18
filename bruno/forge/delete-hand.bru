@@ -1,0 +1,20 @@
+meta {
+  name: Delete hand
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/hands/{{handId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 204
+}
+
+docs {
+  Moves `forge/<id>.json` to `.trash/forge-<id>.<timestamp>.json`. The cast font stays in
+  `world/fonts/` (it's a font like any other now); delete that file by hand if unwanted.
+}

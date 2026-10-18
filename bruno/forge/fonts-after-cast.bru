@@ -1,0 +1,19 @@
+meta {
+  name: Fonts include the cast hand
+  type: http
+  seq: 5
+}
+
+get {
+  url: {{baseUrl}}/api/fonts
+  body: none
+  auth: none
+}
+
+tests {
+  test("the cast hand is served, with a cache-busting version", function () {
+    const face = res.getBody().find((f) => f.file === bru.getVar("castFile"));
+    expect(face).to.include({ family: bru.getVar("handFamily"), source: "world", format: "opentype" });
+    expect(face.url).to.match(/\?v=/);
+  });
+}

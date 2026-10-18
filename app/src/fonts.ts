@@ -15,7 +15,8 @@ let families: FontFamily[] = [];
 const loaded = new Map<string, FontFace>();
 const listeners = new Set<() => void>();
 
-const key = (f: FontFaceInfo): string => `${f.source}:${f.file}`;
+// Keyed by URL: a recast hand keeps its file but gets a new ?v=, and must reload.
+const key = (f: FontFaceInfo): string => f.url;
 
 export async function refreshFonts(): Promise<void> {
   const faces = await api.fonts();

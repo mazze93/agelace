@@ -3,11 +3,12 @@ import { join, relative, sep } from "node:path";
 import fastifyStatic from "@fastify/static";
 import { watch } from "chokidar";
 import Fastify, { type FastifyInstance } from "fastify";
-import { CLIENT_HEADER, EntryDraft, EntryPatch, Id, WorldMeta, type WorldEvent } from "@agelace/shared";
+import { CLIENT_HEADER, EntryDraft, EntryPatch, HandWrite, Id, WorldPatch, type WorldEvent } from "@agelace/shared";
 import type { FastifyRequest } from "fastify";
 import { CanvasStore } from "./canvases.js";
 import { isAssetFile, saveAsset } from "./assets.js";
 import { isFontFile, listBuiltinFonts, listWorldFonts, saveWorldFont } from "./fonts.js";
+import { castFileName, castHand, HandStore } from "./hands.js";
 import { iconSvg, searchIcons } from "./icons.js";
 import { WorldStore } from "./store.js";
 
@@ -29,6 +30,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
 
   const app = Fastify({ logger: { level: process.env["LOG_LEVEL"] ?? "warn" }, bodyLimit: 32 * 1024 * 1024 });
   const canvases = new CanvasStore(store);
+  const hands = new HandStore(store);
   app.decorate("store", store);
   app.decorate("canvases", canvases);
   /** Which browser tab caused a change, so it can ignore its own echo. */
@@ -61,8 +63,10 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
   // ── world ──────────────────────────────────────────────────────────
   app.get("/api/health", async () => ({ ok: true }));
   app.get("/api/world", async () => store.meta());
-  app.patch("/api/world", async (req) => {
-    const meta = await store.setMeta(WorldMeta.partial().parse(req.body));
+  app.patch("/api/world", async (req, reply) => {
+    const patch = WorldPatch.safeParse(req.body);
+    if (!patch.success) return reply.code(400).send({ error: patch.error.issues });
+    const meta = await store.setMeta(patch.data);
     emit({ type: "world", ...by(req) });
     return meta;
   });
@@ -189,6 +193,56 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     allowedPath: (path) => isAssetFile(path),
   });
 
+  // ── the forge: hands drawn by the user, cast into world/fonts ───────
+  app.get("/api/hands", async () => hands.list());
+
+  app.post<{ Body: { family?: unknown } }>("/api/hands", async (req, reply) => {
+    const family = typeof req.body?.family === "string" ? req.body.family.trim().slice(0, 60) : "";
+    if (!family) return reply.code(400).send({ error: "a hand needs a name" });
+    const hand = await hands.create(family);
+    emit({ type: "hand", id: hand.id, op: "upsert", ...by(req) });
+    return reply.code(201).send(hand);
+  });
+
+  app.get<{ Params: { id: string } }>("/api/hands/:id", async (req, reply) => {
+    const id = Id.safeParse(req.params.id);
+    const hand = id.success ? await hands.get(id.data) : undefined;
+    return hand ?? reply.code(404).send({ error: "not found" });
+  });
+
+  app.put<{ Params: { id: string } }>("/api/hands/:id", async (req, reply) => {
+    const id = Id.safeParse(req.params.id);
+    const body = HandWrite.safeParse(req.body);
+    if (!id.success) return reply.code(404).send({ error: "not found" });
+    if (!body.success) return reply.code(400).send({ error: body.error.issues });
+    const hand = await hands.put(id.data, body.data);
+    if (!hand) return reply.code(404).send({ error: "not found" });
+    emit({ type: "hand", id: hand.id, op: "upsert", ...by(req) });
+    return hand;
+  });
+
+  app.delete<{ Params: { id: string } }>("/api/hands/:id", async (req, reply) => {
+    const id = Id.safeParse(req.params.id);
+    if (!id.success || !(await hands.remove(id.data))) return reply.code(404).send({ error: "not found" });
+    emit({ type: "hand", id: id.data, op: "delete", ...by(req) });
+    return reply.code(204).send();
+  });
+
+  app.post<{ Params: { id: string } }>("/api/hands/:id/cast", async (req, reply) => {
+    const id = Id.safeParse(req.params.id);
+    const hand = id.success ? await hands.get(id.data) : undefined;
+    if (!hand) return reply.code(404).send({ error: "not found" });
+    const builtin = await listBuiltinFonts(opts.builtinFontsDir);
+    if (builtin.some((f) => f.family.toLowerCase() === hand.family.toLowerCase()))
+      return reply.code(409).send({ error: `${hand.family} is already a built-in face; give the hand another name` });
+    const { bytes, glyphs } = castHand(hand);
+    if (!glyphs) return reply.code(400).send({ error: "nothing to cast yet: draw a letter first" });
+    const file = castFileName(hand.family);
+    await store.writeBytes(join(store.fontsDir, file), new Uint8Array(bytes));
+    emit({ type: "fonts", ...by(req) });
+    return reply.code(201).send({ file, family: hand.family, glyphs, bytes: bytes.byteLength });
+  });
+
   // ── icons (game-icons.net, CC BY 3.0) ──────────────────────────────
   app.get<{ Querystring: { q?: string; limit?: string } }>("/api/icons", async (req) =>
     searchIcons(req.query.q ?? "", Math.min(Number(req.query.limit) || 120, 600)),
@@ -230,6 +284,9 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
       } else if (rel[0] === "canvases" && rel[1]?.endsWith(".yjs")) {
         const id = Id.safeParse(rel[1].slice(0, -4));
         if (id.success) void canvases.mergeFromDisk(id.data).then(() => emit({ type: "canvas", id: id.data, op: event === "unlink" ? "delete" : "upsert" }));
+      } else if (rel[0] === "forge" && rel[1]?.endsWith(".json")) {
+        const id = Id.safeParse(rel[1].slice(0, -5));
+        if (id.success) emit({ type: "hand", id: id.data, op: event === "unlink" ? "delete" : "upsert" });
       } else if (rel[0] === "world.json") {
         emit({ type: "world" });
       }

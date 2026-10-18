@@ -26,6 +26,16 @@ To close it, double-click **`stop-agelace.cmd`** (or run `./stop-agelace.sh`).
   which pages name each other and which sit together on a board. Drag a seal to
   pin it, click to open it. Every page has a "Strands" box at its foot with a
   link to its own small web.
+- **The Forge**: everything to do with type.
+  - *Type case*: every font you have, each shown in itself. Click one for a
+    full proof; drop a font file on "Add a typeface" to add your own.
+  - *Pairing*: choose a face for titles, one for text and one for labels, and
+    see a page of your own world set in them. Keep pairings you like, or make
+    one "the world's hand" and the whole app takes it on.
+  - *Scriptorium*: draw your own typeface. Pick a nib (broad edge, quill or
+    round), write each letter on the ruled sheet with a pen, finger or mouse,
+    and press "Cast the type". It becomes a real font in your `fonts` folder.
+    A stylus works best: pressure, and its eraser end, both count.
 - **Undo** is Ctrl-Z (⌘Z on a Mac), everywhere.
 
 ## Your world
@@ -37,6 +47,8 @@ Everything you write is in the **`world`** folder next to these files:
 - `assets/`: maps and pictures you've dropped onto boards
 - `fonts/`: drop any `.ttf`, `.otf`, `.woff` or `.woff2` here and it shows up in
   the typeface menu. You can also drag a font onto that menu.
+- `forge/`: the typefaces you've drawn, as editable drawings (casting writes
+  the finished font into `fonts/`)
 - `.trash/`: torn-out pages wait here. Nothing is ever destroyed.
 
 Back up the `world` folder and you have backed up everything.
