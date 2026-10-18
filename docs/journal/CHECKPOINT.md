@@ -5,8 +5,13 @@ Resume point. Append-only phase log below; the "Now" block is rewritten each pha
 ## Now (2026-10-18)
 
 Phases 1–5 done and verified. **Next: phase 6**, tutorial modules from mazze's
-workshopped excerpts, plus prefab assets. A design-system artifact (agelace's
-tokens, type and core components) was offered for mazze to workshop.
+workshopped excerpts, plus prefab assets.
+
+Design system for mazze to workshop (private Claude Design System artifact,
+built from main@77b38e8): https://claude.ai/artifact/7QYgLXsN7Ly3Nh4N9m2rL3
+Tokens (both lamps), house faces, 10 sigils, 12 static component renditions
+using the app's real CSS, plus a cover. Edits made there do NOT flow back into
+the app: port them into `app/src/styles/tokens.css` by hand.
 
 ## Plan
 
@@ -110,6 +115,10 @@ tokens, type and core components) was offered for mazze to workshop.
   secure context. Local HTTPS may be needed for the forge.
 - Margin-note stacking uses heights measured before auto-grow, so notes can
   overlap slightly when several sit close together.
+- Contrast: `--color-ink-faint` fails 4.5:1 for small text in both lamps
+  (3.2:1 daylight, 4.0:1 candle); verdigris on daylight paper is 4.3:1. The
+  editor inks ultramarine, oak-gall and Tyrian are near-unreadable on candle
+  paper. Kept as-is pending mazze's call; flagged in the design system.
 - Forge: stylus tested with synthetic pen events only, not real hardware.
   Kerning is not cast (spacing is per-glyph side bearings only).
 - Board: not yet tested with a real stylus (Windows Ink / Apple Pencil). Pen
