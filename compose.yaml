@@ -12,6 +12,11 @@ services:
       - "${AGELACE_BIND:-127.0.0.1}:${AGELACE_PORT:-8080}:8080"
     volumes:
       - ./world:/world
+    environment:
+      # Notice files you add or edit in ./world yourself (a dropped-in font, a
+      # page synced from elsewhere). Docker Desktop on Windows doesn't pass
+      # file-change events through to the container, so look instead of listen.
+      AGELACE_POLL: "1"
     # Here rather than in the Dockerfile so Docker and Podman both honour it.
     healthcheck:
       test: ["CMD", "node", "-e", "fetch('http://localhost:8080/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]

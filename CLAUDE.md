@@ -71,6 +71,9 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   world (:8091) and runs `e2e/forge.mjs` in Playwright's container: 27 checks,
   exits non-zero on failure, screenshots in `e2e/shots/`. Run it after any UI
   change to the Forge; extend it rather than testing by hand.
+- Codex copies: `AGENTS.md` and `.agents/skills/` are generated from this file
+  and `.claude/skills/` by `scripts/sync-agents.sh`. After editing either, run
+  it; `--check` exits 1 when they're stale. Never edit the copies.
 - Production: `docker compose up -d --build`, which serves :8080. Launchers
   (`start-agelace.*`, `stop-agelace.*`) sit at the repo root so a
   non-technical user finds them.
@@ -107,6 +110,9 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
 - Icon names: `server/test/store.test.ts` scans app source for literal
   `<Sigil name="…">` / `icon: "…"` and fails on any glyph game-icons lacks.
   Keep sigil names literal so the guard can see them.
+- The world watcher polls in production (`AGELACE_POLL=1` in `compose.yaml`).
+  Docker Desktop on Windows doesn't forward file events from a bind mount, so
+  without polling the app never sees files the user adds. Keep it on.
 - The client id comes from `crypto.getRandomValues`. `randomUUID` only exists
   in secure contexts, and the iPad over LAN http is not one.
 

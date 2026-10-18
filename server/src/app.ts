@@ -268,6 +268,7 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
       ignoreInitial: true,
       usePolling: opts.poll ?? false,
       interval: 700,
+      binaryInterval: 1500, // fonts, maps, .yjs: chokidar's default (300ms) is needlessly hot
       ignored: (p) => p.endsWith(".tmp") || p.includes(`${sep}.trash`),
       awaitWriteFinish: { stabilityThreshold: 250, pollInterval: 100 },
     });

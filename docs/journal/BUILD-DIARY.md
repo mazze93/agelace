@@ -296,3 +296,25 @@ The rules of §6 now live in `CLAUDE.md` under "Working rules", where every
 future session reads them before touching the code. This diary keeps the
 evidence behind each one.
 
+
+---
+
+## 10. After the close-out, 2026-10-18
+
+### Found by re-reading this diary
+§4 and §5 listed every unverified Windows behaviour except one the code
+made likely: the world watcher listened for file events, and Docker Desktop on
+Windows doesn't forward them from a bind mount. A font dropped into `fonts/`
+or a page edited by hand would have gone unseen on the friend's PC.
+`compose.yaml` now sets `AGELACE_POLL=1` (binary files poll every 1.5 s), and
+`server/test/watch.test.ts` drives the polling watcher; it fails with the
+watcher off. Still to confirm on real Windows: CHECKPOINT "Open".
+
+### O6 resolved
+`AGENTS.md` and `.agents/skills/` are generated from `CLAUDE.md` and
+`.claude/skills/` by `scripts/sync-agents.sh` and committed. `--check` was shown
+to fail on the stale copy and on an edited skill before being trusted.
+
+### The rule
+§6's rules lived in prose and the audit still broke one of them (§9). A rule
+that matters becomes a check with an exit code; a sentence is a reminder.
