@@ -72,6 +72,10 @@ export function applyTypeset(t: Typeset | undefined): void {
   set("--font-display-sc", t?.display, "display");
   set("--font-body", t?.body, "body");
   set("--font-label", t?.label, "label");
+  // The house small-caps face (IM Fell English SC) has no stand-in in an
+  // arbitrary display family, so ask that family for small capitals instead.
+  if (t?.display) document.documentElement.dataset["hand"] = "display";
+  else delete document.documentElement.dataset["hand"];
 }
 
 export const sameTypeset = (a: Typeset | undefined, b: Typeset | undefined): boolean =>

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type CSSProperties, type DragEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties, type DragEvent } from "react";
 import { api } from "../api";
 import { refreshFonts, useFontFamilies, type FontFamily } from "../fonts";
 import { Sigil } from "../Sigil";
@@ -67,6 +67,7 @@ export function TypeCase() {
   }, [families]);
   const shown = families.filter((f) => (shelf === "all" || shelfOf(f) === shelf) && f.family.toLowerCase().includes(q.trim().toLowerCase()));
   const opened = families.find((f) => f.family === open) ?? null;
+  const closeProof = useCallback(() => setOpen(null), []);
 
   return (
     <div className="type-case">
@@ -76,7 +77,7 @@ export function TypeCase() {
           <input value={text} onChange={(e) => setText(e.target.value)} placeholder={SPECIMEN_DEFAULT} />
         </label>
         <label className="case-size">
-          <span className="sc">{size} pt</span>
+          <span className="sc">{size} px</span>
           <input type="range" min={14} max={96} value={size} onChange={(e) => setSize(Number(e.target.value))} aria-label="Specimen size" />
         </label>
         <input className="case-find" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Find a face…" aria-label="Find a face" />
@@ -108,7 +109,7 @@ export function TypeCase() {
         ))}
         {!shown.length && shelf !== "yours" && <p className="muted">No face by that name on this shelf.</p>}
       </div>
-      {opened && <ProofSheet family={opened} text={text || SPECIMEN_DEFAULT} onClose={() => setOpen(null)} />}
+      {opened && <ProofSheet family={opened} text={text || SPECIMEN_DEFAULT} onClose={closeProof} />}
     </div>
   );
 }
@@ -158,10 +159,17 @@ function AddFace() {
 }
 
 function ProofSheet({ family, text, onClose }: { family: FontFamily; text: string; onClose: () => void }) {
+  const closeRef = useRef<HTMLButtonElement>(null);
   useEffect(() => {
+    // A modal takes focus on open and gives it back on close; Escape closes it.
+    const before = document.activeElement as HTMLElement | null;
+    closeRef.current?.focus();
     const esc = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", esc);
-    return () => document.removeEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("keydown", esc);
+      before?.focus();
+    };
   }, [onClose]);
   const faces = [...family.faces].sort((a, b) => Number(a.weight) - Number(b.weight) || a.style.localeCompare(b.style));
   const use = (role: Role) => {
@@ -172,7 +180,7 @@ function ProofSheet({ family, text, onClose }: { family: FontFamily; text: strin
   return (
     <div className="proof-backdrop" onClick={onClose}>
       <aside className="proof-sheet" role="dialog" aria-modal="true" aria-label={`${family.family}, a proof`} onClick={(e) => e.stopPropagation()}>
-        <button type="button" className="tool proof-close" onClick={onClose} aria-label="Close the proof">
+        <button ref={closeRef} type="button" className="tool proof-close" onClick={onClose} aria-label="Close the proof">
           ✕
         </button>
         <p className="proof-kicker sc">{family.source === "world" ? "From your world's fonts" : `Built in · ${family.category}`}</p>

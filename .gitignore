@@ -9,3 +9,4 @@ server/fonts-builtin/
 test-results/
 playwright-report/
 CLAUDE.local.md
+e2e/shots/

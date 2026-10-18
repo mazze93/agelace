@@ -11,6 +11,7 @@ import {
   ringCommands,
   slugify,
 } from "@agelace/shared";
+import { listWorldFonts } from "./fonts.js";
 import type { WorldStore } from "./store.js";
 
 /**
@@ -37,11 +38,8 @@ export class HandStore {
       if (!name.endsWith(".json") || name.startsWith(".")) continue;
       const hand = await this.read(join(this.dir, name));
       if (!hand) continue;
-      const cast = castFileName(hand.family);
-      const exists = await stat(join(this.world.fontsDir, cast)).then(
-        () => true,
-        () => false,
-      );
+      const cast = hand.cast;
+      const exists = cast ? await fileExists(join(this.world.fontsDir, cast)) : false;
       out.push({
         id: hand.id,
         family: hand.family,
@@ -83,9 +81,37 @@ export class HandStore {
   async put(id: Id, body: HandWrite): Promise<Hand | undefined> {
     const current = await this.get(id);
     if (!current) return undefined;
-    const next = Hand.parse({ ...body, id, format: 1, created: current.created, updated: new Date().toISOString() });
+    const next = Hand.parse({ ...body, id, format: 1, cast: current.cast, created: current.created, updated: new Date().toISOString() });
     await this.world.writeJson(this.path(id), next);
     return next;
+  }
+
+  /**
+   * Cast a hand into world/fonts. Refuses to overwrite a font it didn't make
+   * (a dropped-in file, another hand's cast) or to duplicate a family name;
+   * after a rename, the previous cast goes to .trash rather than lingering as
+   * a ghost family.
+   */
+  async cast(hand: Hand, builtinFamilies: string[]): Promise<{ file: string; glyphs: number; bytes: number }> {
+    const file = castFileName(hand.family);
+    const fam = hand.family.toLowerCase();
+    if (builtinFamilies.some((f) => f.toLowerCase() === fam)) throw new CastError(409, `${hand.family} is already a built-in face; give the hand another name`);
+    if (file !== hand.cast && (await fileExists(join(this.world.fontsDir, file))))
+      throw new CastError(409, `world/fonts/${file} already holds a font this hand didn't make; give the hand another name`);
+    // A font already in world/fonts (another hand's cast, or a file dropped in) that claims the same family.
+    const clash = (await listWorldFonts(this.world.fontsDir)).find((f) => f.file !== file && f.file !== hand.cast && f.family.toLowerCase() === fam);
+    if (clash) throw new CastError(409, `world/fonts/${clash.file} is already the family ${clash.family}; give the hand another name`);
+    const { bytes, glyphs } = castHand(hand);
+    if (!glyphs) throw new CastError(400, "nothing to cast yet: draw a letter first");
+    await this.world.writeBytes(join(this.world.fontsDir, file), new Uint8Array(bytes));
+    if (hand.cast && hand.cast !== file && (await fileExists(join(this.world.fontsDir, hand.cast)))) {
+      const stamp = new Date().toISOString().replace(/[:.]/g, "-");
+      const old = join(this.world.fontsDir, hand.cast);
+      this.world.markWrite(old);
+      await rename(old, join(this.world.root, ".trash", `${stamp}-${hand.cast}`));
+    }
+    await this.world.writeJson(this.path(hand.id), { ...hand, cast: file });
+    return { file, glyphs, bytes: bytes.byteLength };
   }
 
   async remove(id: Id): Promise<boolean> {
@@ -96,6 +122,21 @@ export class HandStore {
     return true;
   }
 }
+
+export class CastError extends Error {
+  constructor(
+    readonly status: 400 | 409,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
+const fileExists = (path: string): Promise<boolean> =>
+  stat(path).then(
+    () => true,
+    () => false,
+  );
 
 /** The font file a hand casts to. Stable per family, so recasting replaces it. */
 export function castFileName(family: string): string {
@@ -129,7 +170,9 @@ export function castHand(hand: Hand): { bytes: ArrayBuffer; glyphs: number } {
         else path.close();
       }
     const cp = ch.codePointAt(0)!;
-    glyphs.push(new opentype.Glyph({ name: `uni${cp.toString(16).toUpperCase().padStart(4, "0")}`, unicode: cp, advanceWidth: placed.advance, path }));
+    const hex = cp.toString(16).toUpperCase();
+    // AGL glyph names: uniXXXX inside the BMP, uXXXXX beyond it.
+    glyphs.push(new opentype.Glyph({ name: cp > 0xffff ? `u${hex}` : `uni${hex.padStart(4, "0")}`, unicode: cp, advanceWidth: placed.advance, path }));
   }
   const font = new opentype.Font({
     familyName: hand.family,

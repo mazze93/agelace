@@ -152,12 +152,14 @@ export const Hand = z.object({
   /** advance of the space character */
   space: z.number().int().min(50).max(1000),
   glyphs: z.record(GlyphKey, Glyph),
+  /** the file in world/fonts this hand last cast to; server-owned */
+  cast: z.string().max(90).optional(),
   created: z.string(),
   updated: z.string(),
 });
 export type Hand = z.infer<typeof Hand>;
 
-export const HandWrite = Hand.omit({ id: true, format: true, created: true, updated: true });
+export const HandWrite = Hand.omit({ id: true, format: true, cast: true, created: true, updated: true });
 export type HandWrite = z.infer<typeof HandWrite>;
 
 export interface HandSummary {

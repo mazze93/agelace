@@ -25,5 +25,8 @@ docs {
   replacing any earlier cast. Letters with no ink are left out, so text falls back to the
   page's face. Emits `{type:"fonts"}`.
 
-  400 if nothing is drawn yet; 409 if the family name is a built-in face's.
+  400 if nothing is drawn yet. 409, and nothing written, if the family is a built-in face's,
+  if `world/fonts/<Family>.otf` exists and this hand didn't make it (a dropped-in font, another
+  hand's cast), or if another font there already claims the family under a different filename.
+  After a rename, the hand's previous cast moves to `.trash/`. The hand records its file as `cast`.
 }

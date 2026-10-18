@@ -43,8 +43,9 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   in font units, y up, 1000/em). `shared/src/glyph.ts` is the one geometry path
   for the live proof and the cast: nib → polygons → polygon-clipping union →
   lines and quadratics. The server casts with opentype.js into
-  `world/fonts/<Family>.otf`. World font URLs carry `?v=<mtime>` so a recast
-  reloads. `typeset` in `world.json` is the world's hand, applied app-wide by
+  `world/fonts/<Family>.otf`, and only ever overwrites its own previous cast
+  (recorded as `cast` in the hand; a rename retires the old file to `.trash`).
+  World font URLs carry `?v=<mtime>` so a recast reloads. `typeset` in `world.json` is the world's hand, applied app-wide by
   overriding the `--font-*` tokens.
 - Runtime-agnostic: image names are fully qualified (`docker.io/library/…`), the
   healthcheck lives in `compose.yaml` (Podman's OCI format drops a Dockerfile
@@ -66,6 +67,10 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   the folder in Bruno.app). `scripts/api-check.sh [folder]` runs it headless
   with `@usebruno/cli` against a throwaway seeded world in the dev container.
   When you add or change a route, add or change its `.bru` file too.
+- Browser: `scripts/browser-check.sh` builds the image, starts it on a throwaway
+  world (:8091) and runs `e2e/forge.mjs` in Playwright's container: 27 checks,
+  exits non-zero on failure, screenshots in `e2e/shots/`. Run it after any UI
+  change to the Forge; extend it rather than testing by hand.
 - Production: `docker compose up -d --build`, which serves :8080. Launchers
   (`start-agelace.*`, `stop-agelace.*`) sit at the repo root so a
   non-technical user finds them.

@@ -40,7 +40,7 @@ const ringsToSvg = (rings: [number, number][][]): string =>
 
 const round = (v: number, places: number) => Math.round(v * 10 ** places) / 10 ** places;
 const chars = (s: string) => [...s];
-const toWrite = ({ id: _id, format: _f, created: _c, updated: _u, ...w }: Hand): HandWrite => w;
+const toWrite = ({ id: _id, format: _f, cast: _cast, created: _c, updated: _u, ...w }: Hand): HandWrite => w;
 
 const NIBS: { kind: NibKind; name: string; gloss: string }[] = [
   { kind: "broad", name: "Broad edge", gloss: "a chisel at a fixed angle" },
@@ -199,17 +199,23 @@ export function HandDesk({ id }: { id: string }) {
   };
   useUndoTarget({ undo: () => step(past.current, future.current), redo: () => step(future.current, past.current) });
 
-  const flush = useCallback(async () => {
-    const h = handRef.current;
-    if (!h || !dirty.current) return;
-    dirty.current = false;
-    try {
-      await api.saveHand(h.id, toWrite(h));
-      setSave((s) => (dirty.current ? s : "saved"));
-    } catch {
-      dirty.current = true;
-      setSave("blotted");
-    }
+  // Saves run one at a time; flush() waits for any save in flight, so casting
+  // right after a stroke never reads the file from before it.
+  const saving = useRef<Promise<void>>(Promise.resolve());
+  const flush = useCallback((): Promise<void> => {
+    saving.current = saving.current.then(async () => {
+      const h = handRef.current;
+      if (!h || !dirty.current) return;
+      dirty.current = false;
+      try {
+        await api.saveHand(h.id, toWrite(h));
+        setSave((s) => (dirty.current ? s : "saved"));
+      } catch {
+        dirty.current = true;
+        setSave("blotted");
+      }
+    });
+    return saving.current;
   }, []);
   useEffect(() => {
     if (!hand || !dirty.current) return;
@@ -439,7 +445,15 @@ function GlyphSheet({ hand, glyph, ch, tool, ghost, onStroke, onErase }: SheetPr
   const svgRef = useRef<SVGSVGElement>(null);
   const [wet, setWet] = useState<GlyphStroke | null>(null);
   const gesture = useRef<{ id: number; kind: "pen" | "erase"; pts: number[]; pen: boolean; key: string } | null>(null);
-  const penSeen = useRef(false);
+  // Palm rejection: once a stylus has written, a resting palm (touch) must not
+  // draw. It is a visible, reversible mode, not a silent lock.
+  // The ref decides (events can arrive before React re-renders); the state shows the notice.
+  const stylusRef = useRef(false);
+  const [stylusOnly, setStylusOnlyState] = useState(false);
+  const setStylusOnly = (on: boolean) => {
+    stylusRef.current = on;
+    setStylusOnlyState(on);
+  };
   const { ascender: asc, descender: desc, capHeight: cap, xHeight: xh } = hand.metrics;
   const top = asc + 110;
   const bottom = desc - 90;
@@ -458,8 +472,8 @@ function GlyphSheet({ hand, glyph, ch, tool, ghost, onStroke, onErase }: SheetPr
 
   const down = (e: ReactPointerEvent<SVGSVGElement>) => {
     if (e.pointerType === "mouse" && e.button !== 0) return;
-    if (e.pointerType === "pen") penSeen.current = true;
-    else if (e.pointerType === "touch" && penSeen.current) return; // a palm resting while a stylus writes
+    if (e.pointerType === "pen") !stylusRef.current && setStylusOnly(true);
+    else if (e.pointerType === "touch" && stylusRef.current) return; // a palm resting while a stylus writes
     const p = toFont(e);
     if (!p) return;
     e.preventDefault();
@@ -512,6 +526,15 @@ function GlyphSheet({ hand, glyph, ch, tool, ghost, onStroke, onErase }: SheetPr
   const slants = hand.nib.kind === "broad" ? Array.from({ length: 24 }, (_, i) => -900 + i * 110) : [];
 
   return (
+    <div className="hand-sheet-frame">
+    {stylusOnly && (
+      <p className="sheet-stylus">
+        Stylus found: fingers rest without drawing.{" "}
+        <button type="button" className="pair-quiet" onClick={() => setStylusOnly(false)}>
+          Let fingers draw
+        </button>
+      </p>
+    )}
     <svg
       ref={svgRef}
       className={`hand-sheet${tool === "erase" ? " uses-eraser" : ""}`}
@@ -559,6 +582,7 @@ function GlyphSheet({ hand, glyph, ch, tool, ghost, onStroke, onErase }: SheetPr
         </text>
       )}
     </svg>
+    </div>
   );
 }
 

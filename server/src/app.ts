@@ -8,7 +8,7 @@ import type { FastifyRequest } from "fastify";
 import { CanvasStore } from "./canvases.js";
 import { isAssetFile, saveAsset } from "./assets.js";
 import { isFontFile, listBuiltinFonts, listWorldFonts, saveWorldFont } from "./fonts.js";
-import { castFileName, castHand, HandStore } from "./hands.js";
+import { CastError, HandStore } from "./hands.js";
 import { iconSvg, searchIcons } from "./icons.js";
 import { WorldStore } from "./store.js";
 
@@ -232,15 +232,15 @@ export async function buildApp(opts: AppOptions): Promise<FastifyInstance> {
     const id = Id.safeParse(req.params.id);
     const hand = id.success ? await hands.get(id.data) : undefined;
     if (!hand) return reply.code(404).send({ error: "not found" });
-    const builtin = await listBuiltinFonts(opts.builtinFontsDir);
-    if (builtin.some((f) => f.family.toLowerCase() === hand.family.toLowerCase()))
-      return reply.code(409).send({ error: `${hand.family} is already a built-in face; give the hand another name` });
-    const { bytes, glyphs } = castHand(hand);
-    if (!glyphs) return reply.code(400).send({ error: "nothing to cast yet: draw a letter first" });
-    const file = castFileName(hand.family);
-    await store.writeBytes(join(store.fontsDir, file), new Uint8Array(bytes));
-    emit({ type: "fonts", ...by(req) });
-    return reply.code(201).send({ file, family: hand.family, glyphs, bytes: bytes.byteLength });
+    try {
+      const builtin = (await listBuiltinFonts(opts.builtinFontsDir)).map((f) => f.family);
+      const cast = await hands.cast(hand, builtin);
+      emit({ type: "fonts", ...by(req) });
+      return reply.code(201).send({ ...cast, family: hand.family });
+    } catch (err) {
+      if (err instanceof CastError) return reply.code(err.status).send({ error: err.message });
+      throw err;
+    }
   });
 
   // ── icons (game-icons.net, CC BY 3.0) ──────────────────────────────

@@ -54,6 +54,27 @@
 .rail-forge {
   margin-top: 0.35rem;
 }
+/* the world's hand replaced the small-caps display face: synthesize small caps in the new one */
+:root[data-hand="display"] .card-region-label {
+  font-variant-caps: small-caps;
+}
+.hand-sheet-frame {
+  position: relative;
+}
+/* overlaid, so the sheet never moves under a pen mid-stroke */
+.sheet-stylus {
+  position: absolute;
+  left: 0.6rem;
+  bottom: 0.4rem;
+  z-index: 1;
+  margin: 0;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--color-paper-raised) 88%, transparent);
+  font-size: var(--step--1);
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
 
 /* shared buttons */
 .pair-primary {

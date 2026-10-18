@@ -1,6 +1,7 @@
 # CHECKPOINT — agelace
 
 Resume point. Append-only phase log below; the "Now" block is rewritten each phase.
+What was promised vs what shipped, and the lessons: `BUILD-DIARY.md` beside this file.
 
 ## Now (2026-10-18)
 
@@ -134,6 +135,14 @@ the app: port them into `app/src/styles/tokens.css` by hand.
   so exposure is low, but `--share` widens it.
 
 ## Log
+
+- 2026-10-18 — Audit of phases 1–5 (see BUILD-DIARY.md §3). Fixed: casts could
+  overwrite a dropped-in font or another hand's cast; renames left ghost
+  families; a save/cast race; palm rejection locked fingers out silently (and
+  the first fix raced React); proof sheet focus; px label; a route; small caps
+  under the world's hand; astral glyph names; design-system CSS that wasn't the
+  app's. The browser suite moved from scratch into `e2e/` +
+  `scripts/browser-check.sh` (27 checks). Server tests 33.
 
 - 2026-10-18 — Phase 5 built. Caught: PATCH /api/world blanked the epigraph
   (zod default under `.partial()`), a live bug since phase 1; font family names

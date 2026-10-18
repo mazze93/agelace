@@ -1,4 +1,4 @@
-import { mkdtemp, readdir, rm } from "node:fs/promises";
+import { mkdtemp, readdir, rename, rm, writeFile } from "node:fs/promises";
 import { readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -124,7 +124,7 @@ describe("hands", () => {
     const hand = created.json() as Hand;
     expect(hand.id).toBe("moonthief-hand");
 
-    const { id, format, created: c, updated, ...rest } = hand;
+    const { id, format, created: c, updated, cast: _cast, ...rest } = hand;
     const put = await app.inject({ method: "PUT", url: `/api/hands/${id}`, payload: { ...rest, glyphs: { L, O, a: { strokes: [] } } } });
     expect(put.statusCode).toBe(200);
 
@@ -155,6 +155,63 @@ describe("hands", () => {
     expect((await app.inject({ method: "DELETE", url: `/api/hands/${id}` })).statusCode).toBe(204);
     expect((await readdir(join(dir, ".trash"))).some((f) => f.startsWith("forge-moonthief-hand."))).toBe(true);
     expect((await app.inject(`/api/hands/${id}`)).statusCode).toBe(404);
+  });
+
+  const drawn = async (family: string, glyphs: Record<string, Glyph> = { L }) => {
+    const hand = (await app.inject({ method: "POST", url: "/api/hands", payload: { family } })).json() as Hand;
+    const { id, format, created, updated, cast, ...rest } = hand;
+    await app.inject({ method: "PUT", url: `/api/hands/${id}`, payload: { ...rest, glyphs } });
+    return hand;
+  };
+
+  it("never overwrites a font it didn't make", async () => {
+    await writeFile(join(dir, "fonts", "Moonthief.otf"), "a font someone dropped in");
+    const hand = await drawn("Moonthief");
+    const cast = await app.inject({ method: "POST", url: `/api/hands/${hand.id}/cast` });
+    expect(cast.statusCode).toBe(409);
+    expect(await readFile(join(dir, "fonts", "Moonthief.otf"), "utf8")).toBe("a font someone dropped in");
+  });
+
+  it("two hands with one name: the first to cast keeps it, the second is refused", async () => {
+    const one = await drawn("Twin");
+    const two = await drawn("Twin");
+    expect((await app.inject({ method: "POST", url: `/api/hands/${one.id}/cast` })).statusCode).toBe(201);
+    expect((await app.inject({ method: "POST", url: `/api/hands/${two.id}/cast` })).statusCode).toBe(409);
+    expect((await app.inject({ method: "POST", url: `/api/hands/${one.id}/cast` })).statusCode).toBe(201); // recasting your own is fine
+  });
+
+  it("refuses a family a dropped-in font already uses under another filename", async () => {
+    const one = await drawn("Shared");
+    await app.inject({ method: "POST", url: `/api/hands/${one.id}/cast` });
+    // The same font now sits under another filename, as if dropped in; Shared.otf itself is gone.
+    await rename(join(dir, "fonts", "Shared.otf"), join(dir, "fonts", "dropped.otf"));
+    const two = await drawn("Shared");
+    const res = await app.inject({ method: "POST", url: `/api/hands/${two.id}/cast` });
+    expect(res.statusCode).toBe(409);
+    expect(res.json().error).toMatch(/dropped\.otf is already the family Shared/);
+  });
+
+  it("recasting after a rename retires the old file to the trash", async () => {
+    const hand = await drawn("First Name");
+    expect((await app.inject({ method: "POST", url: `/api/hands/${hand.id}/cast` })).json().file).toBe("First-Name.otf");
+    const current = (await app.inject(`/api/hands/${hand.id}`)).json() as Hand;
+    expect(current.cast).toBe("First-Name.otf");
+    const { id, format, created, updated, cast, ...rest } = current;
+    await app.inject({ method: "PUT", url: `/api/hands/${id}`, payload: { ...rest, family: "Second Name" } });
+    expect((await app.inject(`/api/hands/${id}`)).json().cast).toBe("First-Name.otf"); // a save never drops it
+    expect((await app.inject({ method: "POST", url: `/api/hands/${id}/cast` })).json().file).toBe("Second-Name.otf");
+    const fonts = await readdir(join(dir, "fonts"));
+    expect(fonts).toEqual(["Second-Name.otf"]);
+    expect((await readdir(join(dir, ".trash"))).some((f) => f.endsWith("First-Name.otf"))).toBe(true);
+  });
+
+  it("casts characters beyond the Basic Multilingual Plane", async () => {
+    const hand = await drawn("Astral", { "\u{16A0}": L, "\u{1F319}": O });
+    expect((await app.inject({ method: "POST", url: `/api/hands/${hand.id}/cast` })).statusCode).toBe(201);
+    const bytes = await readFile(join(dir, "fonts", "Astral.otf"));
+    const font = opentype.parse(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
+    expect(font.charToGlyph("\u{16A0}").unicode).toBe(0x16a0);
+    expect(font.charToGlyph("\u{1F319}").unicode).toBe(0x1f319);
   });
 
   it("refuses to cast an empty hand", async () => {

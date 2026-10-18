@@ -27,8 +27,8 @@ function parseRoute(hash: string): Route {
   if (c?.[1]) return { page: "canvas", id: c[1] };
   const p = /^#\/pattern(?:\/([a-z0-9-]+))?$/.exec(hash);
   if (p) return { page: "pattern", focus: p[1] ?? null };
-  const f = /^#\/forge(?:\/(pairing|hands)(?:\/([a-z0-9-]+))?)?$/.exec(hash);
-  if (f) return { page: "forge", at: f[2] ? { room: "hand", id: f[2] } : f[1] === "pairing" ? { room: "pairing" } : f[1] === "hands" ? { room: "hands" } : { room: "case" } };
+  const f = /^#\/forge(?:\/pairing|\/hands(?:\/([a-z0-9-]+))?)?$/.exec(hash);
+  if (f) return { page: "forge", at: f[1] ? { room: "hand", id: f[1] } : hash.startsWith("#/forge/pairing") ? { room: "pairing" } : hash.startsWith("#/forge/hands") ? { room: "hands" } : { room: "case" } };
   if (hash === "#/colophon") return { page: "colophon" };
   return { page: "home" };
 }
