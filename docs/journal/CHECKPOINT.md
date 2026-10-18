@@ -97,6 +97,10 @@ pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fon
 - Board: Mermaid source edits replace the whole Y.Text, so concurrent edits to
   the same diagram are last-writer-wins.
 - Podman path untested on a real Podman install (Docker path verified).
+- Dependabot / `npm audit`: transitive advisories (braces, katex, lodash-es,
+  nanoid, …) under Excalidraw and Mermaid. `audit fix --force` would make
+  breaking downgrades, so review by hand. The app runs on localhost by default,
+  so exposure is low, but `--share` widens it.
 
 ## Log
 
