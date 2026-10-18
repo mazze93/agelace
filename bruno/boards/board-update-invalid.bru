@@ -1,0 +1,19 @@
+meta {
+  name: Board update, not binary (400)
+  type: http
+  seq: 5
+}
+
+post {
+  url: {{baseUrl}}/api/canvases/{{boardId}}/update
+  body: json
+  auth: none
+}
+
+body:json {
+  { "nodes": [] }
+}
+
+assert {
+  res.status: eq 400
+}

@@ -104,6 +104,13 @@ pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fon
 
 ## Log
 
+- 2026-10-17 — API mapped as a Bruno collection (`bruno/`, 20 requests, every
+  route documented) plus `scripts/api-check.sh` (headless, throwaway world):
+  20/20 pass. It caught a live bug: `fonts.ts` imported opentype.js by name,
+  which Node's ESM loader rejects under `tsx`, so `scripts/dev.sh up` had been
+  broken since phase 2 (the esbuild bundle and Vitest both hid it). Not covered:
+  SSE `/api/events`, binary asset/font uploads.
+
 - 2026-10-17 — Phase 4 built. Caught in-browser: the first fit ran against an
   empty index (marked "fitted" before entries loaded); fit ignored the panel;
   far-zoom labels counter-scaled into a pile; a local weave would have saved its

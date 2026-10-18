@@ -1,0 +1,19 @@
+meta {
+  name: Delete board
+  type: http
+  seq: 6
+}
+
+delete {
+  url: {{baseUrl}}/api/canvases/{{boardId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 204
+}
+
+docs {
+  Moves the board's files to `.trash/`. Emits `{type:"canvas", op:"delete"}`.
+}

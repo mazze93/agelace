@@ -1,0 +1,30 @@
+meta {
+  name: List entries
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/entries
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("summaries carry links and an excerpt, not the doc", function () {
+    const first = res.getBody()[0];
+    if (!first) return;
+    expect(first).to.include.keys("id", "title", "kind", "status", "sigil", "links", "excerpt");
+    expect(first).to.not.have.property("doc");
+  });
+}
+
+docs {
+  Every entry as a summary, sorted by title: the entry minus its rich `doc`, plus
+  `links` (ids it names with `[[ ]]`) and `excerpt` (first 240 chars of plain text).
+}

@@ -1,0 +1,27 @@
+meta {
+  name: Create entry, bad kind (400)
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{baseUrl}}/api/entries
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "Never written",
+    "kind": "dragon"
+  }
+}
+
+assert {
+  res.status: eq 400
+  res.body.error: isArray
+}
+
+docs {
+  Validation failures return the zod issues as `error`.
+}

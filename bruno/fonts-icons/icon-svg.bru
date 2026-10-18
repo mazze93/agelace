@@ -1,0 +1,21 @@
+meta {
+  name: Icon SVG
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/icons/hourglass.svg
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.headers['content-type']: contains image/svg+xml
+}
+
+docs {
+  One icon as SVG (`.svg` suffix optional), cached for a week. 404 for an unknown name.
+  game-icons are CC BY 3.0; the Colophon page carries the credit.
+}

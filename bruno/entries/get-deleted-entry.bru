@@ -1,0 +1,16 @@
+meta {
+  name: Get deleted entry (404)
+  type: http
+  seq: 6
+}
+
+get {
+  url: {{baseUrl}}/api/entries/{{entryId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+  res.body.error: eq not found
+}

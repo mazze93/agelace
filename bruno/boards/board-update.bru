@@ -1,0 +1,25 @@
+meta {
+  name: Board update (Yjs)
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{baseUrl}}/api/canvases/{{boardId}}/update
+  body: file
+  auth: none
+}
+
+body:file {
+  file: @file(fixtures/empty-update.yjs) @contentType(application/octet-stream)
+}
+
+assert {
+  res.status: eq 204
+}
+
+docs {
+  Body: one raw Yjs update. The fixture `fixtures/empty-update.yjs` is the smallest valid one
+  (two zero bytes: no structs, empty delete set). The server merges it into the doc, debounces a write to disk,
+  and emits `{type:"canvas", op:"upsert"}`. 400 if the bytes aren't a Yjs update.
+}

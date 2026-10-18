@@ -54,6 +54,10 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   `scripts/dev.sh npm install`.
 - npm `allowScripts` in the root `package.json` is pinned per esbuild version.
   After an esbuild bump, run `scripts/dev.sh npm install-scripts approve esbuild`.
+- API: `bruno/` is a Bruno collection, one documented request per route (open
+  the folder in Bruno.app). `scripts/api-check.sh [folder]` runs it headless
+  with `@usebruno/cli` against a throwaway seeded world in the dev container.
+  When you add or change a route, add or change its `.bru` file too.
 - Production: `docker compose up -d --build`, which serves :8080. Launchers
   (`start-agelace.*`, `stop-agelace.*`) sit at the repo root so a
   non-technical user finds them.
@@ -66,9 +70,9 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
 - Don't use zod `.default()` on `Entry` fields. `EntryPatch` is a `.partial()`
   of it, so defaults get injected into every PATCH and overwrite real data.
 - Server deps that are CommonJS-only (e.g. opentype.js) must be bundled by
-  esbuild, not marked `--external`. Vitest accepts named CJS imports that
-  Node's ESM loader rejects at runtime, so only the container smoke test
-  catches this.
+  esbuild, not marked `--external`, and imported by their **default** export.
+  Vitest accepts named CJS imports that Node's ESM loader rejects, so a named
+  import passes tests and then breaks `tsx` (`dev.sh up`, `api-check.sh`).
 - Custom TipTap nodes that render `<a>` need a parse `priority` above the Link
   mark's, or the node is lost on an HTML round-trip.
 - There must be exactly one React. npm once hoisted React 18 to satisfy

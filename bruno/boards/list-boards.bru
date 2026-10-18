@@ -1,0 +1,22 @@
+meta {
+  name: List boards
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/canvases
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+docs {
+  `CanvasSummary[]`: `{ id, name, updated, nodes, entries, threads }`. `entries` are the
+  entry ids laid on the board; `threads` are `{from, to, label}` between two entry cards.
+  The Pattern draws from these without loading any Yjs doc.
+}

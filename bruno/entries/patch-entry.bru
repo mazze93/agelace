@@ -1,0 +1,41 @@
+meta {
+  name: Patch entry
+  type: http
+  seq: 4
+}
+
+patch {
+  url: {{baseUrl}}/api/entries/{{entryId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "status": "question",
+    "doc": {
+      "type": "doc",
+      "content": [
+        { "type": "paragraph", "content": [{ "type": "text", "text": "Who forged it, and why?" }] }
+      ]
+    }
+  }
+}
+
+assert {
+  res.status: eq 200
+  res.body.status: eq question
+  res.body.title: eq {{probeTitle}}
+}
+
+tests {
+  test("updated moves forward, created stays", function () {
+    const b = res.getBody();
+    expect(Date.parse(b.updated)).to.be.at.least(Date.parse(b.created));
+  });
+}
+
+docs {
+  Any subset of the entry's fields. `id` and `created` can't change; `updated` is stamped.
+  The whole doc is replaced, not merged. Emits `{type:"entry", op:"upsert"}`.
+}

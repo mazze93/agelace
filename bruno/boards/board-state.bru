@@ -1,0 +1,21 @@
+meta {
+  name: Board state (Yjs)
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/canvases/{{boardId}}/state
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.headers['content-type']: contains application/octet-stream
+}
+
+docs {
+  The board as one Yjs update (`Y.encodeStateAsUpdate`). Pass `?sv=<base64url state vector>`
+  to get only what that vector lacks. That's how a tab catches up after an event.
+}

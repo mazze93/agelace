@@ -1,0 +1,20 @@
+meta {
+  name: Delete entry
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{baseUrl}}/api/entries/{{entryId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 204
+}
+
+docs {
+  Moves `entries/<id>.json` to `.trash/<id>.<timestamp>.json`. Nothing is ever hard-deleted.
+  Emits `{type:"entry", op:"delete"}`.
+}

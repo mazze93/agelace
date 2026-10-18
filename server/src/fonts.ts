@@ -1,6 +1,6 @@
 import { readdir, readFile, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
-import { parse as parseFont } from "opentype.js";
+import opentype from "opentype.js";
 import type { FontFaceInfo } from "@agelace/shared";
 
 const FORMATS: Record<string, FontFaceInfo["format"]> = {
@@ -79,7 +79,7 @@ function describe(file: string, ext: string, buf: Buffer): Pick<FontFaceInfo, "f
   if (ext === ".woff2") return fallback;
   try {
     const ab = buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.byteLength) as ArrayBuffer;
-    const font = parseFont(ab);
+    const font = opentype.parse(ab);
     const names = font.names as unknown as Record<string, Record<string, string> | undefined>;
     const family =
       names["typographicFamily"]?.["en"] ?? names["preferredFamily"]?.["en"] ?? names["fontFamily"]?.["en"];

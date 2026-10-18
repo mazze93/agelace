@@ -1,0 +1,15 @@
+meta {
+  name: Icon SVG, unknown (404)
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/icons/no-such-glyph
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 404
+}

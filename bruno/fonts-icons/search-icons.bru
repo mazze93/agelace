@@ -1,0 +1,33 @@
+meta {
+  name: Search icons
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{baseUrl}}/api/icons?q=crown&limit=10
+  body: none
+  auth: none
+}
+
+params:query {
+  q: crown
+  limit: 10
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+  res.body.length: lte 10
+}
+
+tests {
+  test("an exact name ranks first", function () {
+    expect(res.getBody()[0]).to.equal("crown");
+  });
+}
+
+docs {
+  game-icons.net names matching every term in `q` (space- or dash-separated), best first.
+  `limit` defaults to 120, max 600. An empty `q` lists them alphabetically.
+}

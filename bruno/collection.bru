@@ -1,0 +1,33 @@
+headers {
+  x-agelace-client: bruno
+}
+
+docs {
+  # agelace API
+
+  The server behind the app. Everything is JSON over HTTP, rooted at `/api`, except:
+
+  - board state and board updates, which are raw **Yjs** binary (`application/octet-stream`)
+  - asset and font uploads, which are the raw file bytes (`application/octet-stream`, `?name=` carries the filename)
+  - `GET /api/events`, a **Server-Sent Events** stream: `data: {"type":"entry"|"canvas"|"fonts"|"world", id?, op?, by?}`
+
+  ## The `x-agelace-client` header
+
+  Every write echoes to all open tabs over `/api/events`, tagged `by` with this header's value
+  (`[\w-]{1,64}`). A tab drops events that carry its own id. This collection sends `bruno`.
+
+  ## Environments
+
+  - **agelace**: the app on `localhost:8080`, which is *your real world*. Writes land there:
+    the entry and board requests in this collection create a probe and then delete it
+    (deleted entries go to `world/.trash/`, never destroyed).
+  - **dev**: the API under `scripts/dev.sh up` (also :8080; Vite on :5173 proxies `/api`).
+  - **throwaway**: what `scripts/api-check.sh` uses: a fresh seeded world in a temp dir, run in the dev container.
+
+  ## Not covered by requests
+
+  - `GET /api/events`: Bruno would wait on the stream forever. Try `curl -N localhost:8080/api/events`.
+  - `POST /api/assets` and `POST /api/fonts`: binary uploads. Send a file body with
+    `content-type: application/octet-stream` and `?name=map.png` / `?name=MyFace.otf`.
+  - Static files: `/fonts/builtin/<file>`, `/fonts/world/<file>`, `/assets/<file>`.
+}

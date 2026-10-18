@@ -1,0 +1,21 @@
+meta {
+  name: Get entry
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/entries/{{entryId}}
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body.id: eq {{entryId}}
+  res.body.doc.type: eq doc
+}
+
+docs {
+  One entry, whole, including its rich `doc`. 404 if the id is unknown.
+}

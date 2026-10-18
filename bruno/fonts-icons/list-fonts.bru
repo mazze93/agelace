@@ -1,0 +1,31 @@
+meta {
+  name: List fonts
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/fonts
+  body: none
+  auth: none
+}
+
+assert {
+  res.status: eq 200
+  res.body: isArray
+}
+
+tests {
+  test("each face says where it came from and where to load it", function () {
+    for (const f of res.getBody()) {
+      expect(f.source).to.be.oneOf(["builtin", "world"]);
+      expect(f.url).to.match(/^\/fonts\/(builtin|world)\//);
+    }
+  });
+}
+
+docs {
+  Built-in faces (from `fonts-builtin/manifest.json`) then the world's own (`world/fonts/`,
+  named from the font's tables where opentype.js can read them). Each:
+  `{ family, file, weight, style, url, format, source }`.
+}

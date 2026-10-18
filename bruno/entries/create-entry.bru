@@ -1,0 +1,56 @@
+meta {
+  name: Create entry
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/entries
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "title": "{{probeTitle}}",
+    "kind": "thing",
+    "status": "proposed",
+    "tags": ["bruno"]
+  }
+}
+
+script:pre-request {
+  bru.setVar("probeTitle", "Bruno probe " + Date.now());
+}
+
+script:post-response {
+  bru.setVar("entryId", res.body.id);
+}
+
+assert {
+  res.status: eq 201
+  res.body.status: eq proposed
+  res.body.sigil: eq crystal-ball
+}
+
+tests {
+  test("id is a slug of the title", function () {
+    expect(res.getBody().id).to.match(/^bruno-probe-\d+/);
+  });
+}
+
+docs {
+  Body is an `EntryDraft`:
+
+  | field | |
+  |---|---|
+  | `title` | required |
+  | `kind` | required: `chronicle` `person` `place` `age` `thing` `note` |
+  | `status` | `canon` `proposed` `question` (default `question`) |
+  | `sigil` | a game-icons name (default: the kind's sigil) |
+  | `tags` | string[] |
+  | `doc` | a TipTap/ProseMirror JSON doc |
+
+  The id is a slug of the title, suffixed `-2`, `-3`… on collision. Emits `{type:"entry", op:"upsert"}`.
+  Anything a machine makes should enter as `proposed`.
+}
