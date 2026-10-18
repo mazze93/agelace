@@ -16,6 +16,16 @@ export const EntryKind = z.enum([
 ]);
 export type EntryKind = z.infer<typeof EntryKind>;
 
+/** Each kind's default sigil (game-icons names), shared by server and app. */
+export const KIND_SIGIL: Record<EntryKind, string> = {
+  chronicle: "quill-ink",
+  person: "hood",
+  place: "castle",
+  age: "hourglass",
+  thing: "crystal-ball",
+  note: "scroll-unfurled",
+};
+
 // Ids double as filenames, so keep them filesystem-safe on every OS
 // (Windows forbids <>:"/\|?* and is case-insensitive → lowercase only).
 export const Id = z
@@ -95,6 +105,10 @@ export interface CanvasSummary {
   name: string;
   updated: string;
   nodes: number;
+  /** entries placed on the board (deduplicated) */
+  entries: Id[];
+  /** threads drawn between two entry cards, resolved to entry ids */
+  threads: { from: Id; to: Id; label: string }[];
 }
 
 export const CLIENT_HEADER = "x-agelace-client";

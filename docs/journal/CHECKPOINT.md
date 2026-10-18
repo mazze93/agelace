@@ -4,7 +4,8 @@ Resume point. Append-only phase log below; the "Now" block is rewritten each pha
 
 ## Now (2026-10-17)
 
-Phases 1–3 done and verified. **Next: phase 4, the graph view + icons everywhere.**
+Phases 1–4 done and verified. **Next: phase 5, the font forge** (library and
+pairing view, then stylus glyph drawing → opentype.js → `.otf` in `world/fonts/`).
 
 ## Plan
 
@@ -17,7 +18,10 @@ Phases 1–3 done and verified. **Next: phase 4, the graph view + icons everywhe
    map/image cards, Excalidraw sketch cards, semantic zoom (prose → sigil as you
    zoom out). Stored as Yjs docs in `world/canvases/*.yjs`, plus a write-only
    JSON Canvas export (`*.canvas`) that Obsidian can open.
-4. Graph view (d3-force, sigils as nodes) + the icon library everywhere
+4. ✅ The Pattern: graph view (d3-force, sigil seals as nodes, boards as lozenges,
+   wikilinks / board threads / board membership as strands), local weave per
+   entry, Strands (backlinks) panel on every entry, seal cards on boards, kind
+   sigils in the rail
 5. Font forge: library view and pairing; then stylus glyph drawing → opentype.js →
    `.otf` written into `world/fonts/`
 6. Tutorial modules from mazze's workshopped excerpts (Merchants of War / How to
@@ -49,6 +53,22 @@ Phases 1–3 done and verified. **Next: phase 4, the graph view + icons everywhe
 - No console errors. 390 px width: no sideways scroll, and margin notes become
   endnotes.
 
+## Verified (phase 4)
+
+- Server 18 tests (board summaries name entries + threads; icon guard now scans
+  app source). App 18 tests (`weave`: mutual links, boards, filters, focus depth).
+- Browser (prod image, isolated test world on :8081, 17 linked entries + a board):
+  - Pattern renders and fits beside the panel; status reads from the seal.
+  - Drag pins a seal (saved, click suppressed), pin button loosens it.
+  - Hover lights the neighbourhood; search highlights and Enter centres.
+  - Click opens the entry; its Strands panel lists named-in / names / laid-on.
+  - Local weave `#/pattern/<id>`: depth 1 → 5 seals, depth 2 → 11.
+  - Board joins the weave; labelled thread "taxed by" renders.
+  - Seal card: struck from the icon grid, named, re-inked; undo/redo round-trip.
+  - 500 px (narrowest the window goes) + light theme: no sideways scroll, panel folds.
+- Compose healthcheck reports `healthy` (moved out of the Dockerfile for Podman).
+- amd64 image (emulated) builds, serves health and the new board summaries.
+
 ## Verified (phase 3)
 
 - Server 17 tests: two-client merge, state-vector deltas, .yjs/.canvas
@@ -76,9 +96,14 @@ Phases 1–3 done and verified. **Next: phase 4, the graph view + icons everywhe
 - Board: sketches don't support embedded images yet (use a Map card).
 - Board: Mermaid source edits replace the whole Y.Text, so concurrent edits to
   the same diagram are last-writer-wins.
-- amd64 portability check not re-run since phase 3 deps were added.
+- Podman path untested on a real Podman install (Docker path verified).
 
 ## Log
+
+- 2026-10-17 — Phase 4 built. Caught in-browser: the first fit ran against an
+  empty index (marked "fitted" before entries loaded); fit ignored the panel;
+  far-zoom labels counter-scaled into a pile; a local weave would have saved its
+  centred layout (and the subject's pin) over the whole Pattern's.
 
 - 2026-10-17 — Phase 3 built. Bugs caught in-browser: React 18/19 duplicate
   (Excalidraw peer hoist), CSS class collisions (`tool-select` 33px surface;

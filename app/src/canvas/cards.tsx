@@ -69,7 +69,52 @@ export function SketchCard({ node }: CardProps) {
 }
 
 /** Regions gather cards — an age, a continent, a chapter. Label edits in place. */
-export function RegionCard({ node, doc, editing, onDone }: CardProps) {
+export function RegionCard(p: CardProps) {
+  return (
+    <div className="card-region-label">
+      <LabelEditor {...p} placeholder="An unnamed region" aria="Region name" />
+    </div>
+  );
+}
+
+const SEAL_INKS = ["lampblack", "rubric", "verdigris", "ultramarine", "orpiment", "tyrian"];
+
+/**
+ * A seal: one sigil, struck at any size — a map marker, a house device, a
+ * warning in the margin of an age. Double-click to name it or change its ink.
+ */
+export function SealCard(p: CardProps) {
+  const { node, doc, editing } = p;
+  return (
+    <div className="card-seal" style={{ color: node.color ?? "var(--ink-lampblack)" }}>
+      <Sigil name={node.icon ?? "fleur-de-lys"} className="card-seal-glyph" />
+      {(editing || node.label) && (
+        <div className="card-seal-label">
+          <LabelEditor {...p} placeholder="" aria="Seal name" />
+        </div>
+      )}
+      {editing && (
+        <div className="card-seal-inks" onPointerDown={(e) => e.preventDefault()}>
+          {SEAL_INKS.map((k) => (
+            <button
+              key={k}
+              type="button"
+              aria-label={k}
+              title={k}
+              aria-pressed={node.color === `var(--ink-${k})`}
+              style={{ color: `var(--ink-${k})` }}
+              onClick={() => transact(doc, () => setNode(doc, node.id, { color: `var(--ink-${k})` }))}
+            >
+              <span className="ink-dot" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function LabelEditor({ node, doc, editing, onDone, placeholder, aria }: CardProps & { placeholder: string; aria: string }) {
   const [draft, setDraft] = useState(node.label ?? "");
   const input = useRef<HTMLInputElement>(null);
   useEffect(() => {
@@ -79,26 +124,22 @@ export function RegionCard({ node, doc, editing, onDone }: CardProps) {
     }
   }, [editing, node.label]);
   const commit = () => {
-    transact(doc, () => setNode(doc, node.id, { label: draft.trim() }));
+    if (draft.trim() !== (node.label ?? "")) transact(doc, () => setNode(doc, node.id, { label: draft.trim() }));
     onDone();
   };
-  return (
-    <div className="card-region-label">
-      {editing ? (
-        <input
-          ref={input}
-          value={draft}
-          aria-label="Region name"
-          onChange={(e) => setDraft(e.target.value)}
-          onBlur={commit}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") commit();
-            if (e.key === "Escape") onDone();
-          }}
-        />
-      ) : (
-        <span>{node.label || "An unnamed region"}</span>
-      )}
-    </div>
+  return editing ? (
+    <input
+      ref={input}
+      value={draft}
+      aria-label={aria}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === "Enter") commit();
+        if (e.key === "Escape") onDone();
+      }}
+    />
+  ) : (
+    <span>{node.label || placeholder}</span>
   );
 }

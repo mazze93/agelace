@@ -15,8 +15,9 @@ real and tested underneath.
 
 ## Status
 
-Phases 1–3 built (2026-10-17): container + folder-backed API + design system +
-rich-text editor + Yjs canvas ("boards"). Next: phase 4, the graph view. Plan, decisions and
+Phases 1–4 built (2026-10-17): container + folder-backed API + design system +
+rich-text editor + Yjs canvas ("boards") + the Pattern (graph view, `#/pattern`).
+Next: phase 5, the font forge. Plan, decisions and
 resume point: `docs/journal/CHECKPOINT.md`. The root Perplexity `*.md` files are
 reference only. `test-report.md` "passes" tests that never ran against any code.
 
@@ -33,6 +34,13 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   plain HTTP + SSE (`app/src/canvas/sync.ts`). All local mutations go through
   `transact()` with the `LOCAL` origin, which is what `Y.UndoManager` tracks.
   Entries are still JSON files, single-writer.
+- The Pattern (`app/src/pattern/`): `graph.ts` is the pure model (tested);
+  `PatternPage.tsx` runs d3-force and moves DOM nodes through refs on each tick,
+  never through React state. Board summaries carry `entries` + `threads` so the
+  graph never loads Y.Docs. Saved layout is per-viewer localStorage, whole view only.
+- Runtime-agnostic: image names are fully qualified (`docker.io/library/…`), the
+  healthcheck lives in `compose.yaml` (Podman's OCI format drops a Dockerfile
+  HEALTHCHECK), and launchers fall back from `docker` to `podman`.
 - Undo: one Cmd/Ctrl-Z router (`app/src/undo.ts`). `.ProseMirror` surfaces keep
   their own history. Everything else goes to the most recently mounted target.
 
@@ -72,6 +80,9 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   `is-*` / `uses-*` for state modifiers.
 - Live events carry `by` (the tab's client id). `subscribe()` drops a tab's
   own echoes, so never re-apply your own save from the event stream.
+- Icon names: `server/test/store.test.ts` scans app source for literal
+  `<Sigil name="…">` / `icon: "…"` and fails on any glyph game-icons lacks.
+  Keep sigil names literal so the guard can see them.
 - The client id comes from `crypto.getRandomValues`. `randomUUID` only exists
   in secure contexts, and the iPad over LAN http is not one.
 

@@ -4,7 +4,7 @@
 name: agelace-dev
 services:
   dev:
-    image: node:24-bookworm
+    image: docker.io/library/node:24-bookworm
     working_dir: /work
     volumes:
       - .:/work

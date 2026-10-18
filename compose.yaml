@@ -12,3 +12,9 @@ services:
       - "${AGELACE_BIND:-127.0.0.1}:${AGELACE_PORT:-8080}:8080"
     volumes:
       - ./world:/world
+    # Here rather than in the Dockerfile so Docker and Podman both honour it.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 10s
+      timeout: 3s
+      start_period: 10s

@@ -8,7 +8,7 @@ import { IconGrid, Popover } from "./pickers";
 import { Sigil } from "./Sigil";
 import { StatusMark, statusLabel } from "./status";
 import { useUndoTarget } from "./undo";
-import { refreshEntries } from "./world";
+import { refreshEntries, useWorld } from "./world";
 
 export interface EntryPageProps {
   id: string;
@@ -245,6 +245,7 @@ export function EntryPage({ id }: EntryPageProps) {
         onReady={(ed) => (editorRef.current = ed)}
         onTransaction={onTransaction}
       />
+      <Strands id={id} />
       <footer className="leaf-foot">
         <button type="button" className="quiet-danger" onClick={() => void remove()}>
           Tear out this page
@@ -252,5 +253,45 @@ export function EntryPage({ id }: EntryPageProps) {
         <span className="muted">Torn pages go to the world’s .trash folder, never the fire.</span>
       </footer>
     </article>
+  );
+}
+
+/** Where this entry sits in the weave: who names it, whom it names, which boards hold it. */
+function Strands({ id }: { id: string }) {
+  const { entries, byId, canvases } = useWorld();
+  const self = byId.get(id);
+  const namedBy = entries.filter((e) => e.id !== id && e.links.includes(id));
+  const names = (self?.links ?? []).map((l) => byId.get(l)).filter((e): e is NonNullable<typeof e> => !!e && e.id !== id);
+  const boards = canvases.filter((c) => c.entries.includes(id));
+  if (!namedBy.length && !names.length && !boards.length) return null;
+  const row = (label: string, list: { href: string; sigil: string; title: string; key: string }[]) =>
+    list.length > 0 && (
+      <div>
+        <dt>{label}</dt>
+        <dd>
+          {list.map((x) => (
+            <a key={x.key} href={x.href}>
+              <Sigil name={x.sigil} />
+              {x.title}
+            </a>
+          ))}
+        </dd>
+      </div>
+    );
+  const asRow = (e: { id: string; sigil: string; title: string }) => ({ key: e.id, href: `#/e/${e.id}`, sigil: e.sigil, title: e.title });
+  return (
+    <aside className="strands" aria-label="Strands">
+      <h2>
+        <Sigil name="spider-web" /> Strands
+      </h2>
+      <dl>
+        {row("Named in", namedBy.map(asRow))}
+        {row("Names", names.map(asRow))}
+        {row("Laid on", boards.map((c) => ({ key: c.id, href: `#/c/${c.id}`, sigil: "treasure-map", title: c.name })))}
+      </dl>
+      <a className="strands-weave" href={`#/pattern/${id}`}>
+        See its weave in the Pattern →
+      </a>
+    </aside>
   );
 }

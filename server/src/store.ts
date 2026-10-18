@@ -7,6 +7,7 @@ import {
   type EntryPatch,
   type EntrySummary,
   type Id,
+  KIND_SIGIL,
   WorldMeta,
   emptyDoc,
   extractLinks,
@@ -117,7 +118,7 @@ export class WorldStore {
       title: draft.title,
       kind: draft.kind,
       status: draft.status ?? "question",
-      sigil: draft.sigil ?? defaultSigil[draft.kind],
+      sigil: draft.sigil ?? KIND_SIGIL[draft.kind],
       tags: draft.tags ?? [],
       doc: draft.doc ?? emptyDoc(),
       created: now,
@@ -178,14 +179,6 @@ export class WorldStore {
   }
 }
 
-const defaultSigil: Record<Entry["kind"], string> = {
-  chronicle: "quill-ink",
-  person: "hood",
-  place: "castle",
-  age: "hourglass",
-  thing: "crystal-ball",
-  note: "scroll-unfurled",
-};
 
 async function exists(path: string): Promise<boolean> {
   try {

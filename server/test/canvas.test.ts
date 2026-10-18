@@ -92,6 +92,33 @@ describe("canvas sync", () => {
     expect((await app.inject("/api/canvases")).json()[0]).toMatchObject({ id: "ages", name: "Ages", nodes: 1 });
   });
 
+  it("summaries name the entries on a board and the threads between them", async () => {
+    const { id } = (await app.inject({ method: "POST", url: "/api/canvases", payload: { name: "Weave" } })).json();
+    const a = await client(id);
+    await push(id, a, () => {
+      card(a, "n1", 0);
+      card(a, "n2", 300);
+      (a.getMap("nodes").get("n2") as Y.Map<unknown>).set("entryId", "the-age-before-names");
+      card(a, "n3", 600); // a second card for the same entry
+      const note = new Y.Map<unknown>();
+      note.set("type", "text");
+      a.getMap("nodes").set("t1", note);
+      const thread = (k: string, from: string, to: string, label?: string) => {
+        const e = new Y.Map<unknown>();
+        e.set("from", from);
+        e.set("to", to);
+        if (label) e.set("label", label);
+        a.getMap("edges").set(k, e);
+      };
+      thread("e1", "n1", "n2", "foretold");
+      thread("e2", "n1", "t1"); // to a plain card: not an entry thread
+      thread("e3", "n1", "n3"); // same entry both ends: no self-thread
+    });
+    const row = (await app.inject("/api/canvases")).json().find((c: { id: string }) => c.id === id);
+    expect(row.entries.sort()).toEqual(["how-to-begin", "the-age-before-names"]);
+    expect(row.threads).toEqual([{ from: "how-to-begin", to: "the-age-before-names", label: "foretold" }]);
+  });
+
   it("rejects garbage updates and unknown boards", async () => {
     const { id } = (await app.inject({ method: "POST", url: "/api/canvases", payload: { name: "X" } })).json();
     const bad = await app.inject({ method: "POST", url: `/api/canvases/${id}/update`, headers: bin, payload: Buffer.from("nope") });

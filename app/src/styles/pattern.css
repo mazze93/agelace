@@ -1,0 +1,575 @@
+/* ── the Pattern (graph view) ──────────────────────────────────────────
+   Seals on a loom. Status reads at a glance from the seal itself:
+   canon is struck solid in ink, proposed is a verdigris trial ring,
+   a question is a dotted vermilion outline round a faded glyph.        */
+
+.pattern {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pattern.is-panning {
+  cursor: grabbing;
+}
+
+.pattern-wheel {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(92vmin, 960px);
+  height: min(92vmin, 960px);
+  transform: translate(-50%, -50%);
+  fill: none;
+  stroke: var(--color-rule);
+  stroke-width: 0.8;
+  opacity: 0.45;
+  pointer-events: none;
+}
+.pattern-wheel circle:nth-child(2) {
+  stroke-dasharray: 2 7;
+}
+
+.pattern-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+  --inv: 1;
+}
+.pattern-strands {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1px;
+  height: 1px;
+  overflow: visible;
+  pointer-events: none;
+}
+
+/* strands — shared with the legend */
+.strand {
+  stroke-linecap: round;
+  transition: opacity 160ms, stroke 160ms;
+}
+.strand-link {
+  stroke: color-mix(in oklab, var(--color-ink-soft) 55%, transparent);
+  stroke-width: 1;
+}
+.strand-link.is-mutual {
+  stroke: var(--color-ink-soft);
+  stroke-width: 1.7;
+}
+.strand-thread {
+  stroke: var(--color-accent);
+  stroke-width: 1.5;
+}
+.strand-holds {
+  stroke: var(--color-accent-2);
+  stroke-width: 1;
+  stroke-dasharray: 3 5;
+  opacity: 0.55;
+}
+.strand-label {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.strand-label > span {
+  position: absolute;
+  transform: translate(-50%, -50%) scale(clamp(0.6, var(--inv), 2.4));
+  padding: 0 0.35em;
+  background: var(--color-paper);
+  color: var(--color-accent);
+  font: italic 400 0.82rem / 1.3 var(--font-body);
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 160ms;
+}
+.pattern[data-near="true"] .strand-label > span,
+.strand-label.is-lit > span {
+  opacity: 1;
+}
+
+/* seals */
+.pn {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  transition: opacity 160ms;
+}
+.pn-link {
+  position: absolute;
+  left: 0;
+  top: 0;
+  text-decoration: none;
+  cursor: pointer;
+  touch-action: none;
+  animation: pn-in 520ms var(--ease-quill) both;
+  animation-delay: calc(var(--i) * 14ms);
+}
+.pn-link:focus-visible {
+  outline: none;
+}
+.pn-seal {
+  position: absolute;
+  left: calc(var(--r) * -1);
+  top: calc(var(--r) * -1);
+  width: calc(var(--r) * 2);
+  height: calc(var(--r) * 2);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--color-paper-raised);
+  box-shadow: 0 0 0 1.5px var(--seal-ring, var(--color-ink)), 0 0 0 4px var(--color-paper), var(--shadow-leaf);
+  color: var(--seal-glyph, var(--color-ink));
+  transition: transform 180ms var(--ease-quill), box-shadow 180ms;
+}
+.pn-seal .sigil {
+  width: 58%;
+  height: 58%;
+}
+
+.st-canon .pn-seal {
+  background: var(--color-ink);
+  --seal-glyph: var(--color-paper);
+  --seal-ring: var(--color-ink);
+}
+.st-proposed .pn-seal {
+  --seal-ring: var(--color-accent-2);
+  --seal-glyph: var(--color-accent-2);
+  outline: 1.5px dashed var(--color-accent-2);
+  outline-offset: 5px;
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-accent-2) 40%, transparent), var(--shadow-leaf);
+}
+.st-question .pn-seal {
+  background: var(--color-paper);
+  --seal-glyph: color-mix(in oklab, var(--color-accent) 70%, transparent);
+  outline: 2px dotted var(--color-accent);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+/* an age wears a second rim — the long count */
+.kind-age.st-canon .pn-seal,
+.kind-age .pn-seal {
+  box-shadow: 0 0 0 1.5px var(--seal-ring, var(--color-ink)), 0 0 0 5px var(--color-paper), 0 0 0 6px var(--color-ink-soft), var(--shadow-leaf);
+}
+.pn-board .pn-seal {
+  border-radius: 22%;
+  transform: rotate(45deg);
+  background: var(--color-paper-raised);
+  --seal-glyph: var(--color-accent-2);
+  box-shadow: 0 0 0 1.5px var(--color-accent-2), 0 0 0 4px var(--color-paper), var(--shadow-leaf);
+}
+.pn-board .pn-seal .sigil {
+  transform: rotate(-45deg);
+}
+.pn.is-subject .pn-seal {
+  box-shadow: 0 0 0 1.5px var(--seal-ring, var(--color-ink)), 0 0 0 5px var(--color-paper), 0 0 0 7px var(--color-accent), var(--shadow-leaf);
+}
+
+.pn-label {
+  position: absolute;
+  left: 0;
+  top: calc(var(--r) + 7px);
+  transform: translateX(-50%) scale(clamp(0.55, var(--inv), 1.6));
+  transform-origin: 50% 0;
+  max-width: 12rem;
+  width: max-content;
+  text-align: center;
+  font: 400 0.98rem / 1.15 var(--font-display);
+  color: var(--color-ink);
+  text-shadow: 0 0 5px var(--color-paper), 0 0 2px var(--color-paper), 0 0 1px var(--color-paper);
+  opacity: 0;
+  transition: opacity 160ms;
+  pointer-events: none;
+}
+.pn-board .pn-label {
+  font: 500 0.8rem / 1.2 var(--font-label);
+  letter-spacing: 0.08em;
+  color: var(--color-accent-2);
+}
+.pattern[data-near="true"] .pn-label,
+.pn.is-hub .pn-label,
+.pn.is-lit .pn-label,
+.pn.is-hit .pn-label,
+.pn.is-subject .pn-label,
+.pn-link:focus-visible .pn-label {
+  opacity: 1;
+}
+/* far out, even hubs fall silent unless asked */
+.pattern[data-far="true"] .pn.is-hub:not(.is-lit, .is-hit, .is-subject) .pn-label {
+  opacity: 0;
+}
+.pn-link:hover .pn-seal,
+.pn-link:focus-visible .pn-seal {
+  transform: scale(1.08);
+}
+.pn-board .pn-link:hover .pn-seal,
+.pn-board .pn-link:focus-visible .pn-seal {
+  transform: rotate(45deg) scale(1.08);
+}
+.pn-link:focus-visible .pn-seal {
+  outline: 2px solid var(--color-focus);
+  outline-offset: 6px;
+}
+
+.pn-pin {
+  position: absolute;
+  left: calc(var(--r) * 0.55);
+  top: calc(var(--r) * -1.15);
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0.2rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--color-paper);
+  color: var(--color-accent);
+  box-shadow: 0 0 0 1px var(--color-rule);
+  cursor: pointer;
+  transform: scale(clamp(0.6, var(--inv), 2));
+}
+.pn-pin .sigil {
+  width: 100%;
+  height: 100%;
+}
+
+/* emphasis: hover lights a seal and its neighbours; search dims the rest */
+.pattern.is-hot .pn:not(.is-lit),
+.pattern.is-searching:not(.is-hot) .pn:not(.is-hit) {
+  opacity: 0.16;
+}
+.pattern.is-hot .strand:not(.is-lit) {
+  opacity: 0.07;
+}
+.pattern.is-hot .strand.is-lit {
+  stroke-width: 2.2;
+}
+.pattern.is-hot .strand-link.is-lit {
+  stroke: var(--color-ink);
+}
+
+/* the panel */
+.pattern-panel {
+  position: absolute;
+  z-index: 5;
+  top: 0.9rem;
+  left: 0.9rem;
+  width: min(18.5rem, calc(100% - 1.8rem));
+  max-height: calc(100% - 1.8rem);
+  overflow-y: auto;
+  display: grid;
+  gap: 0.7rem;
+  padding: 0.9rem 1rem 0.8rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 6px;
+  background: color-mix(in oklab, var(--color-paper-raised) 92%, transparent);
+  backdrop-filter: blur(8px);
+  box-shadow: var(--shadow-leaf);
+  cursor: auto;
+  user-select: text;
+  -webkit-user-select: text;
+  scrollbar-width: thin;
+  animation: rise 300ms var(--ease-quill) both;
+}
+.pattern-panel header {
+  position: relative;
+  display: grid;
+  gap: 0.15rem;
+}
+.pattern-fold {
+  display: none;
+}
+.pattern-kicker {
+  margin: 0;
+  font: 500 var(--step--1) / 1 var(--font-label);
+  letter-spacing: 0.12em;
+  color: var(--color-ink-faint);
+}
+.pattern-panel h1 {
+  margin: 0;
+  font: 400 var(--step-2) / 1.02 var(--font-display);
+  color: var(--color-accent);
+}
+.pattern-count {
+  margin: 0;
+  font-style: italic;
+  color: var(--color-ink-soft);
+}
+.pattern-search {
+  width: 100%;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  background: var(--color-paper);
+}
+.pattern-search::placeholder {
+  color: var(--color-ink-faint);
+  font-style: italic;
+}
+.pattern-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.pattern-chips button,
+.pattern-depth button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.55rem 0.25rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-ink-faint);
+  font: 500 var(--step--1) / 1.2 var(--font-label);
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: background 120ms, color 120ms, border-color 120ms;
+}
+.pattern-chips button[aria-pressed="true"],
+.pattern-depth button[aria-pressed="true"] {
+  border-color: var(--color-ink-soft);
+  background: var(--color-paper);
+  color: var(--color-ink);
+}
+.pattern-chips button[aria-pressed="false"] .sigil,
+.pattern-chips button[aria-pressed="false"] .status-mark {
+  opacity: 0.45;
+}
+.pattern-depth {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font: 500 var(--step--1) / 1 var(--font-label);
+  letter-spacing: 0.06em;
+  color: var(--color-ink-soft);
+}
+.pattern-depth span {
+  margin-right: auto;
+}
+.pattern-depth button {
+  min-width: 2rem;
+  justify-content: center;
+  font-variant-numeric: lining-nums;
+}
+.pattern-key {
+  display: grid;
+  gap: 0.2rem;
+  margin: 0;
+  font-size: var(--step--1);
+  color: var(--color-ink-soft);
+}
+.pattern-key div {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.pattern-key dt svg {
+  display: block;
+  width: 1.8rem;
+  height: 0.5rem;
+  overflow: visible;
+}
+.pattern-key dd {
+  margin: 0;
+  font-style: italic;
+}
+.pattern-panel footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+  border-top: 1px solid var(--color-rule);
+  padding-top: 0.6rem;
+}
+.pattern-panel footer .tool {
+  text-decoration: none;
+  font-variant-numeric: lining-nums;
+}
+.pattern-hint {
+  margin: 0;
+  font-size: var(--step--1);
+  font-style: italic;
+  color: var(--color-ink-faint);
+}
+.pattern-empty {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  max-width: 22rem;
+  margin: 0;
+  text-align: center;
+  font: italic 400 var(--step-1) / 1.3 var(--font-body);
+  color: var(--color-ink-faint);
+  pointer-events: none;
+}
+
+/* rail entry to the Pattern */
+.rail-pattern {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  text-decoration: none;
+  font: 400 var(--step-0) / 1.1 var(--font-display);
+  transition: background 120ms, border-color 120ms;
+}
+.rail-pattern .sigil {
+  color: var(--color-accent);
+  width: 1.2em;
+  height: 1.2em;
+}
+.rail-pattern small {
+  margin-left: auto;
+  font: 500 var(--step--1) / 1 var(--font-label);
+  color: var(--color-ink-faint);
+  font-variant-numeric: lining-nums;
+}
+.rail-pattern:hover,
+.rail-pattern[aria-current="page"] {
+  background: var(--color-paper-raised);
+  border-color: var(--color-ink-faint);
+}
+.rail-group h2 .sigil {
+  width: 1.05em;
+  height: 1.05em;
+  margin-right: 0.2em;
+  vertical-align: -0.2em;
+}
+
+@keyframes pn-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+}
+
+@media (max-width: 860px) {
+  .pattern-panel {
+    top: auto;
+    bottom: 0.6rem;
+    left: 0.6rem;
+    width: calc(100% - 1.2rem);
+    max-height: 42%;
+    gap: 0.5rem;
+    padding: 0.6rem 0.75rem;
+  }
+  .pattern-panel h1 {
+    font-size: var(--step-1);
+  }
+  .pattern-key,
+  .pattern-hint {
+    display: none;
+  }
+  .pattern-fold {
+    display: block;
+    position: absolute;
+    right: 0;
+    top: 0;
+  }
+  .pattern-panel.is-folded > :not(header, .pattern-search) {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .pattern-chips button,
+  .pattern-depth button {
+    min-height: 2.25rem;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pn-link,
+  .pattern-panel {
+    animation: none;
+  }
+  .pn,
+  .pn-seal,
+  .strand,
+  .pn-label {
+    transition: none;
+  }
+}
+
+/* strands under an entry: its place in the weave */
+.strands {
+  max-width: var(--measure);
+  margin-top: 3.5rem;
+  padding: 1rem 1.1rem 0.9rem;
+  border: 1px solid var(--color-rule);
+  border-radius: var(--radius);
+  background: color-mix(in oklab, var(--color-paper-raised) 60%, transparent);
+}
+.strands h2 {
+  margin: 0 0 0.6rem;
+  font: 800 var(--step--1) / 1 var(--font-label);
+  letter-spacing: 0.14em;
+  color: var(--color-accent);
+}
+.strands h2 .sigil {
+  width: 1.1em;
+  height: 1.1em;
+  vertical-align: -0.2em;
+  margin-right: 0.25em;
+}
+.strands dl {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+.strands dl > div {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: 0.6rem;
+  align-items: baseline;
+}
+.strands dt {
+  font: 500 var(--step--1) / 1.4 var(--font-label);
+  letter-spacing: 0.06em;
+  color: var(--color-ink-faint);
+}
+.strands dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.9rem;
+  margin: 0;
+}
+.strands dd a {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.3rem;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+.strands dd a:hover {
+  border-bottom-color: var(--color-accent);
+}
+.strands dd .sigil {
+  color: var(--color-ink-soft);
+  align-self: center;
+}
+.strands-weave {
+  display: inline-block;
+  margin-top: 0.8rem;
+  font: italic 400 var(--step--1) / 1 var(--font-body);
+  color: var(--color-accent);
+}
+@media (max-width: 520px) {
+  .strands dl > div {
+    grid-template-columns: 1fr;
+    gap: 0.1rem;
+  }
+}

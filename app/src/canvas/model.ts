@@ -8,7 +8,7 @@ import * as Y from "yjs";
 export const LOCAL = Symbol("agelace-local");
 export const REMOTE = "remote";
 
-export type NodeType = "entry" | "text" | "mermaid" | "image" | "sketch" | "region";
+export type NodeType = "entry" | "text" | "mermaid" | "image" | "sketch" | "region" | "seal";
 
 export interface NodeSnap {
   id: string;
@@ -25,6 +25,9 @@ export interface NodeSnap {
   source?: string;
   /** sketch preview svg (rendered by Excalidraw on save) */
   preview?: string;
+  /** seal: game-icons name and ink */
+  icon?: string;
+  color?: string;
 }
 
 export interface EdgeSnap {
@@ -80,6 +83,8 @@ export function snapshot(doc: Y.Doc): Snapshot {
       ...(str(m.get("label")) !== undefined ? { label: str(m.get("label")) } : {}),
       ...(src instanceof Y.Text ? { source: src.toString() } : {}),
       ...(str(m.get("preview")) ? { preview: str(m.get("preview")) } : {}),
+      ...(str(m.get("icon")) ? { icon: str(m.get("icon")) } : {}),
+      ...(str(m.get("color")) ? { color: str(m.get("color")) } : {}),
     });
   });
   // Regions always sit beneath cards; within a layer, z then id for stability.
@@ -116,6 +121,8 @@ export interface NewNode {
   src?: string;
   label?: string;
   source?: string;
+  icon?: string;
+  color?: string;
 }
 
 /** Create a card. Caller wraps in transact(). */
@@ -131,6 +138,8 @@ export function addNode(doc: Y.Doc, n: NewNode): string {
   if (n.entryId) m.set("entryId", n.entryId);
   if (n.src) m.set("src", n.src);
   if (n.label !== undefined) m.set("label", n.label);
+  if (n.icon) m.set("icon", n.icon);
+  if (n.color) m.set("color", n.color);
   if (n.type === "mermaid") m.set("source", new Y.Text(n.source ?? ""));
   if (n.type === "text") m.set("body", new Y.XmlFragment());
   nodesOf(doc).set(id, m);
@@ -179,7 +188,7 @@ export function addStroke(doc: Y.Doc, points: number[], color: string, size: num
   return id;
 }
 
-export function setNode(doc: Y.Doc, id: string, patch: Partial<Pick<NodeSnap, "x" | "y" | "w" | "h" | "z" | "label" | "src" | "preview">>): void {
+export function setNode(doc: Y.Doc, id: string, patch: Partial<Pick<NodeSnap, "x" | "y" | "w" | "h" | "z" | "label" | "src" | "preview" | "icon" | "color">>): void {
   const m = nodesOf(doc).get(id);
   if (!m) return;
   for (const [k, v] of Object.entries(patch)) {

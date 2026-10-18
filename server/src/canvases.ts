@@ -13,7 +13,7 @@ import type { WorldStore } from "./store.js";
  *
  * Document shape (see app/src/canvas/model.ts for the typed view):
  *   meta:  Y.Map  { name, created }
- *   nodes: Y.Map<id, Y.Map>   cards: entry | text | mermaid | image | sketch | region
+ *   nodes: Y.Map<id, Y.Map>   cards: entry | text | mermaid | image | sketch | region | seal
  *   edges: Y.Map<id, Y.Map>   { from, to, label }
  *   ink:   Y.Map<id, Y.Map>   { points: number[] (x,y,pressure…), color, size }
  */
@@ -73,13 +73,7 @@ export class CanvasStore {
     for (const id of await this.ids()) {
       const doc = await this.load(id);
       if (!doc) continue;
-      const meta = doc.getMap("meta");
-      out.push({
-        id,
-        name: String(meta.get("name") ?? id),
-        updated: String(meta.get("updated") ?? meta.get("created") ?? ""),
-        nodes: doc.getMap("nodes").size,
-      });
+      out.push(summarize(id, doc));
     }
     return out.sort((a, b) => a.name.localeCompare(b.name));
   }
@@ -99,7 +93,7 @@ export class CanvasStore {
     });
     this.docs.set(id, doc);
     await this.persist(id);
-    return { id, name, updated: now, nodes: 0 };
+    return summarize(id, doc);
   }
 
   /** Full state, or only what a client with state vector `sv` is missing. */
@@ -156,6 +150,35 @@ export class CanvasStore {
   }
 }
 
+/**
+ * Listing row. Besides the count it names the entries a board holds and the
+ * threads drawn between them, so the Pattern (graph view) can weave boards in
+ * without loading every Y.Doc in the browser.
+ */
+function summarize(id: Id, doc: Y.Doc): CanvasSummary {
+  const meta = doc.getMap("meta");
+  const nodes = doc.getMap<Y.Map<unknown>>("nodes");
+  const entryOf = new Map<string, Id>();
+  for (const [nid, n] of nodes) {
+    const e = n.get("entryId");
+    if (n.get("type") === "entry" && typeof e === "string") entryOf.set(nid, e);
+  }
+  const threads: CanvasSummary["threads"] = [];
+  for (const e of doc.getMap<Y.Map<unknown>>("edges").values()) {
+    const from = entryOf.get(String(e.get("from")));
+    const to = entryOf.get(String(e.get("to")));
+    if (from && to && from !== to) threads.push({ from, to, label: typeof e.get("label") === "string" ? String(e.get("label")) : "" });
+  }
+  return {
+    id,
+    name: String(meta.get("name") ?? id),
+    updated: String(meta.get("updated") ?? meta.get("created") ?? ""),
+    nodes: nodes.size,
+    entries: [...new Set(entryOf.values())],
+    threads,
+  };
+}
+
 // ── JSON Canvas 1.0 export (jsoncanvas.org) ──────────────────────────────
 // Lossy by design: Obsidian sees cards, regions and arrows; agelace keeps
 // the extra fields (prefixed agelace*) and its own .yjs as the truth.
@@ -183,6 +206,9 @@ async function toJsonCanvas(doc: Y.Doc, world: WorldStore): Promise<{ nodes: Jso
       nodes.push({ ...geo, type: "text", text: entry ? `# ${entry.title}` : "*(torn out)*", agelaceEntry: n["entryId"] });
     } else if (kind === "mermaid") {
       nodes.push({ ...geo, type: "text", text: "```mermaid\n" + String(n["source"] ?? "") + "\n```" });
+    } else if (kind === "seal") {
+      const label = n["label"] ? ` — ${String(n["label"])}` : "";
+      nodes.push({ ...geo, type: "text", text: `*(seal: ${String(n["icon"] ?? "")}${label})*`, agelaceSeal: n["icon"] });
     } else if (kind === "text") {
       const frag = raw.get("body");
       nodes.push({ ...geo, type: "text", text: frag instanceof Y.XmlFragment ? xmlText(frag) : "" });

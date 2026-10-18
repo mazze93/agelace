@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type { FastifyInstance } from "fastify";
+import { KIND_SIGIL } from "@agelace/shared";
 import { buildApp } from "../src/app.js";
 import { fromFilename, looksLikeFont } from "../src/fonts.js";
 import { iconSvg, searchIcons } from "../src/icons.js";
@@ -91,12 +92,19 @@ describe("icons", () => {
     expect(svg).toContain("currentColor");
   });
 
-  it("every icon the app names exists", () => {
-    // default sigils, editor + board toolbars, rail
-    const used = ["quill-ink", "hood", "castle", "hourglass", "crystal-ball", "scroll-unfurled", "open-book", "fleur-de-lys", "arrow-cursor", "hand", "quill", "broom", "treasure-map"];
-    for (const n of used) {
-      expect(iconSvg(n), n).toBeDefined();
+  it("every icon the app names exists", async () => {
+    // Scan the app source for literal sigil names, so a new toolbar icon
+    // can't ship pointing at a glyph game-icons doesn't have.
+    const root = join(import.meta.dirname, "..", "..", "app", "src");
+    const used = new Set<string>(Object.values(KIND_SIGIL));
+    const files = (await readdir(root, { recursive: true })).filter((f) => /\.tsx?$/.test(f) && !f.includes(".test."));
+    for (const f of files) {
+      const src = await readFile(join(root, f), "utf8");
+      for (const m of src.matchAll(/<Sigil[^>]*?\bname="([a-z0-9-]+)"/g)) used.add(m[1]!);
+      for (const m of src.matchAll(/\b(?:icon|sigil): "([a-z0-9-]+)"/g)) used.add(m[1]!);
     }
+    expect([...used]).toEqual(expect.arrayContaining(["treasure-map", "pin", "arrow-cursor", "fleur-de-lys"]));
+    for (const n of used) expect(iconSvg(n), n).toBeDefined();
   });
 });
 

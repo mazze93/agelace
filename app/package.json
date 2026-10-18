@@ -31,7 +31,8 @@
     "@tiptap/y-tiptap": "^3.0.10",
     "mermaid": "^12.2.0",
     "perfect-freehand": "^1.2.3",
-    "@excalidraw/excalidraw": "^0.18.1"
+    "@excalidraw/excalidraw": "^0.18.1",
+    "d3-force": "^3.0.0"
   },
   "devDependencies": {
     "@types/react": "^19.0.0",
@@ -40,6 +41,7 @@
     "jsdom": "^26.0.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.4",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "@types/d3-force": "^3.0.10"
   }
 }

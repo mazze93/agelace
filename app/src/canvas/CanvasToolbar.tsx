@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Popover } from "../pickers";
+import { IconGrid, Popover } from "../pickers";
 import { Sigil } from "../Sigil";
 import { StatusMark } from "../status";
 import { rankEntries } from "../editor/wikiSuggest";
@@ -95,6 +95,9 @@ export function CanvasToolbar(p: CanvasToolbarProps) {
         <button type="button" className="tool tool-word" onClick={() => p.place({ type: "sketch" })} title="A sketch (Excalidraw)">
           Sketch
         </button>
+        <Popover title="Strike a seal — any sigil, in the current ink" label={<span className="tool-word">Seal</span>}>
+          {(close) => <IconGrid onPick={(icon) => (p.place({ type: "seal", icon, color: p.ink.color }), close())} />}
+        </Popover>
         <button type="button" className="tool tool-word" onClick={() => p.place({ type: "region", label: "" })} title="A region that gathers cards — an age, a land">
           Region
         </button>

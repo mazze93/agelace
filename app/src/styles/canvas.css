@@ -554,3 +554,74 @@ g.is-selected .thread {
     display: none;
   }
 }
+
+/* seals: a single sigil struck at any size */
+.card.is-seal > .card-body {
+  background: none;
+  border: 0;
+  box-shadow: none;
+  overflow: visible;
+}
+.card-seal {
+  position: relative;
+  height: 100%;
+  display: grid;
+  place-items: center;
+}
+.card-seal-glyph {
+  width: 100% !important;
+  height: 100% !important;
+}
+.card-seal-label {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: 18rem;
+  margin-top: 0.3rem;
+  font: 400 1.15rem / 1.1 var(--font-display);
+  color: var(--color-ink);
+  text-align: center;
+}
+.card-seal-label input {
+  width: 12rem;
+  border: 0;
+  border-bottom: 1px solid var(--color-accent);
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+}
+.card-seal-inks {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 0.15rem;
+  margin-bottom: 0.4rem;
+  padding: 0.2rem 0.3rem;
+  border: 1px solid var(--color-rule);
+  border-radius: 999px;
+  background: var(--color-paper-raised);
+  box-shadow: var(--shadow-leaf);
+}
+.card-seal-inks button {
+  display: grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.card-seal-inks button[aria-pressed="true"] {
+  box-shadow: 0 0 0 1.5px var(--color-ink-soft);
+}
+.lod-far .card-seal-label {
+  transform: translateX(-50%) scale(min(var(--inv), 4));
+  transform-origin: 50% 0;
+}

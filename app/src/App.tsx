@@ -1,21 +1,29 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { EntryKind, type EntrySummary } from "@agelace/shared";
+import { EntryKind, KIND_SIGIL, type EntrySummary } from "@agelace/shared";
 import { api, subscribe } from "./api";
 import { CanvasPage } from "./canvas/CanvasPage";
 import { Colophon } from "./Colophon";
 import { EntryPage } from "./EntryPage";
+import { PatternPage } from "./pattern/PatternPage";
 import { refreshFonts } from "./fonts";
 import { Sigil } from "./Sigil";
 import { StatusMark } from "./status";
 import { refreshCanvases, refreshEntries, refreshMeta, useWorld } from "./world";
 
-type Route = { page: "home" } | { page: "entry"; id: string } | { page: "canvas"; id: string } | { page: "colophon" };
+type Route =
+  | { page: "home" }
+  | { page: "entry"; id: string }
+  | { page: "canvas"; id: string }
+  | { page: "pattern"; focus: string | null }
+  | { page: "colophon" };
 
 function parseRoute(hash: string): Route {
   const m = /^#\/e\/([a-z0-9-]+)$/.exec(hash);
   if (m?.[1]) return { page: "entry", id: m[1] };
   const c = /^#\/c\/([a-z0-9-]+)$/.exec(hash);
   if (c?.[1]) return { page: "canvas", id: c[1] };
+  const p = /^#\/pattern(?:\/([a-z0-9-]+))?$/.exec(hash);
+  if (p) return { page: "pattern", focus: p[1] ?? null };
   if (hash === "#/colophon") return { page: "colophon" };
   return { page: "home" };
 }
@@ -64,12 +72,14 @@ export function App() {
   return (
     <div className="shell">
       <div className="atmosphere" aria-hidden="true" />
-      <IndexRail current={route.page === "entry" || route.page === "canvas" ? route.id : null} />
-      <main className={`desk${route.page === "canvas" ? " desk-board" : ""}`} id="main">
+      <IndexRail current={route.page === "entry" || route.page === "canvas" ? route.id : route.page === "pattern" ? "pattern" : null} />
+      <main className={`desk${route.page === "canvas" || route.page === "pattern" ? " desk-board" : ""}`} id="main">
         {route.page === "entry" ? (
           <EntryPage id={route.id} />
         ) : route.page === "canvas" ? (
           <CanvasPage id={route.id} />
+        ) : route.page === "pattern" ? (
+          <PatternPage focus={route.focus} />
         ) : route.page === "colophon" ? (
           <Colophon />
         ) : (
@@ -117,10 +127,17 @@ function IndexRail({ current }: { current: string | null }) {
       </a>
       <NewEntry />
       <input className="rail-search" type="search" placeholder="Search the index" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search entries" />
+      <a className="rail-pattern" href="#/pattern" aria-current={current === "pattern" ? "page" : undefined}>
+        <Sigil name="spider-web" />
+        <span>The Pattern</span>
+        <small>{entries.length}</small>
+      </a>
       <div className="rail-scroll">
         {canvases.length > 0 && (
           <section className="rail-group">
-            <h2>Boards</h2>
+            <h2>
+              <Sigil name="treasure-map" /> Boards
+            </h2>
             <ul>
               {canvases
                 .filter((c) => !q.trim() || c.name.toLowerCase().includes(q.trim().toLowerCase()))
@@ -138,7 +155,9 @@ function IndexRail({ current }: { current: string | null }) {
         )}
         {groups.map(([kind, list]) => (
           <section key={kind} className="rail-group">
-            <h2>{KIND_HEAD[kind]}</h2>
+            <h2>
+              <Sigil name={KIND_SIGIL[kind]} /> {KIND_HEAD[kind]}
+            </h2>
             <ul>
               {list.map((e) => (
                 <li key={e.id}>

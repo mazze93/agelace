@@ -2,7 +2,7 @@ import { Suspense, lazy, useCallback, useEffect, useLayoutEffect, useMemo, useRe
 import * as Y from "yjs";
 import { api } from "../api";
 import { useUndoTarget } from "../undo";
-import { EntryCard, ImageCard, RegionCard, SketchCard, type CardProps } from "./cards";
+import { EntryCard, ImageCard, RegionCard, SealCard, SketchCard, type CardProps } from "./cards";
 import {
   boundsOf,
   contains,
@@ -68,6 +68,7 @@ const CARD: Record<NewNode["type"], { w: number; h: number }> = {
   image: { w: 420, h: 300 },
   sketch: { w: 360, h: 260 },
   region: { w: 900, h: 560 },
+  seal: { w: 120, h: 120 },
 };
 
 const CARDS: Record<NodeSnap["type"], (p: CardProps) => React.ReactNode> = {
@@ -77,6 +78,7 @@ const CARDS: Record<NodeSnap["type"], (p: CardProps) => React.ReactNode> = {
   image: ImageCard,
   sketch: SketchCard,
   region: RegionCard,
+  seal: SealCard,
 };
 
 const viewKey = (id: string) => `agelace-view-${id}`;
