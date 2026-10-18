@@ -1,7 +1,8 @@
 # CHECKPOINT — agelace
 
 Resume point. Append-only phase log below; the "Now" block is rewritten each phase.
-What was promised vs what shipped, and the lessons: `BUILD-DIARY.md` beside this file.
+What was promised vs what shipped, and the lessons: `BUILD-DIARY.md` beside this file
+(also published as a page: https://claude.ai/artifact/NQvUz4JAF5fbeXYr7xYa9h; the repo copy is the one to append to).
 
 ## Now (2026-10-18)
 
