@@ -1,6 +1,6 @@
-import { randomBytes } from "node:crypto";
 import { mkdir, readdir, readFile, rename, rm, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { randomHex } from "./bytes.js";
 import {
   Entry,
   type EntryDraft,
@@ -168,7 +168,7 @@ export class WorldStore {
   }
 
   async writeBytes(path: string, data: Uint8Array | string): Promise<void> {
-    const tmp = `${path}.${randomBytes(4).toString("hex")}.tmp`;
+    const tmp = `${path}.${randomHex(4)}.tmp`;
     await writeFile(tmp, data);
     this.markWrite(path);
     try {

@@ -2,6 +2,7 @@ import { readdir, readFile, stat, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import opentype from "opentype.js";
 import type { FontFaceInfo } from "@agelace/shared";
+import { hex, latin1 } from "./bytes.js";
 
 const FORMATS: Record<string, FontFaceInfo["format"]> = {
   ".woff2": "woff2",
@@ -76,7 +77,7 @@ export async function listWorldFonts(dir: string): Promise<FontFaceInfo[]> {
   return out;
 }
 
-function describe(file: string, ext: string, buf: Buffer): Pick<FontFaceInfo, "family" | "weight" | "style"> {
+function describe(file: string, ext: string, buf: Uint8Array): Pick<FontFaceInfo, "family" | "weight" | "style"> {
   const fallback = fromFilename(file);
   if (ext === ".woff2") return fallback;
   try {
@@ -135,7 +136,7 @@ export function fromFilename(file: string): Pick<FontFaceInfo, "family" | "weigh
 }
 
 /** Accept an uploaded font. The filename is reduced to a safe, portable form. */
-export async function saveWorldFont(dir: string, rawName: string, data: Buffer): Promise<string> {
+export async function saveWorldFont(dir: string, rawName: string, data: Uint8Array): Promise<string> {
   const ext = extname(rawName).toLowerCase();
   if (!(ext in FORMATS)) throw new Error(`unsupported font type ${ext || "(none)"}`);
   if (!looksLikeFont(data)) throw new Error("file is not a font");
@@ -151,9 +152,8 @@ export async function saveWorldFont(dir: string, rawName: string, data: Buffer):
 }
 
 /** Magic numbers: TrueType, OpenType CFF, WOFF, WOFF2. */
-export function looksLikeFont(data: Buffer): boolean {
+export function looksLikeFont(data: Uint8Array): boolean {
   if (data.byteLength < 12) return false;
   const tag = data.subarray(0, 4);
-  const hex = tag.toString("hex");
-  return hex === "00010000" || ["OTTO", "true", "wOFF", "wOF2"].includes(tag.toString("latin1"));
+  return hex(tag) === "00010000" || ["OTTO", "true", "wOFF", "wOF2"].includes(latin1(tag));
 }

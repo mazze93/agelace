@@ -40,7 +40,7 @@ export class CanvasStore {
   async load(id: Id): Promise<Y.Doc | undefined> {
     const hit = this.docs.get(id);
     if (hit) return hit;
-    let bytes: Buffer;
+    let bytes: Uint8Array;
     try {
       bytes = await readFile(this.path(id, "yjs"));
     } catch {
