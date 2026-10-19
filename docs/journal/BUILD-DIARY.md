@@ -318,3 +318,47 @@ to fail on the stale copy and on an edited skill before being trusted.
 ### The rule
 §6's rules lived in prose and the audit still broke one of them (§9). A rule
 that matters becomes a check with an exit code; a sentence is a reminder.
+
+## 11. The beta track (B1–B6), 2026-10-19
+
+### Promised
+Resolve the Dependabot alerts with theatre-of-dependencies; rebuild the image
+on secure-container-template's posture; a beta release the friend can run with
+picture-driven instructions; an in-browser demo that is the real app; a
+landing page that is also the build-in-public record. Session captured with
+core-sample.
+
+### Shipped
+- 13 alerts → 0 (`npm audit`: 0). theatre-of-dependencies v0.2.0 first had to
+  learn npm workspaces (v0.1.0 staged nothing on agelace), then two npm
+  semantics it got wrong: one act carrying a package on two major lines, and
+  override keys matching by name at every depth. braces (no fix published)
+  closed by overriding Sass's chokidar; Sass is never imported.
+- Image 469 → 287 MB: distroless Node 24, server fully bundled, build stage
+  on `$BUILDPLATFORM`, UID 10001, read-only, caps dropped, plain-words refusal
+  when `/world` isn't writable. CI and release workflows, every action pinned
+  to an API-resolved SHA; the friend's zip from `scripts/release-bundle.sh`.
+- One route table (`server/src/routes.ts`) behind Fastify and behind the
+  sandbox's service worker; `demo/` is the real build on an IndexedDB-backed
+  filesystem. `e2e/sandbox/demo.mjs` (16 checks) in CI.
+- `/agelace/` and `/agelace/guide/` on the spine (blog branch
+  `agelace/landing`), screenshots from `scripts/press-shots.sh`.
+
+### Diverged
+- The Mac launcher never worked on double-click (a `.sh` opens in an editor);
+  `.command` wrappers added. The README sent newcomers to the source tree.
+- `browser-check.sh` only worked on OrbStack: Playwright reached the app via
+  the host gateway, which a stock Linux Docker refuses. Found by CI's first run.
+- A 7 MB service worker installed in a persistent profile and failed in an
+  ephemeral one ("Failed to access storage"): private windows would never
+  have seen the sandbox. The icon set now loads at runtime; worker 836 KB.
+- Entry titles clipped mid-word (an `<input>` in display type); found while
+  taking the landing page's screenshots. Now a sized textarea, checked.
+- Not done here: deploying the sandbox, pushing the blog branch, tagging the
+  release, making the repo public. Each needs mazze's go-ahead (CHECKPOINT).
+
+### The rule
+Run it the way someone else's machine will: a stock Linux runner, a private
+window, a double-click on a Mac. Every one of this track's real defects was
+invisible from the machine it was built on, and each was found by changing
+the environment, not by reading the code.

@@ -157,6 +157,18 @@ the app: port them into `app/src/styles/tokens.css` by hand.
 
 ## Log
 
+- 2026-10-19 — B5 + B6 built and verified. Sandbox (`demo/`, 16 checks) and
+  landing + guide (blog branch `agelace/landing` @ de753c2, `npm run check`
+  green, drift checks clean). CI green on all five jobs. Waiting on mazze for
+  the outward steps, in order: (1) deploy `demo/dist` to Pages project
+  `agelace-demo` (blocked by the auto-mode classifier as a production deploy);
+  (2) make `mazze93/agelace` public (history audited: gitleaks 0 over 16+
+  commits, no manuscript text, no large blobs, world/ never tracked; old
+  commits carry mazze@mazzeleczzare.com as author); (3) tag `v0.2.0-beta.1`
+  (publishes the GHCR image + GitHub Release with the zip), then set the GHCR
+  package public if it isn't; (4) push `agelace/landing`, review the preview,
+  merge. Then: core-sample compile.
+
 - 2026-10-19 — B3 done. Image 469 MB → 287 MB (distroless Node 24, Debian 13,
   by digest; server fully bundled, no node_modules; build stage native on
   $BUILDPLATFORM). Non-root 10001 (launcher passes host UID on mac/Linux),
