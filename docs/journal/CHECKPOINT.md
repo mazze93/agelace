@@ -4,10 +4,25 @@ Resume point. Append-only phase log below; the "Now" block is rewritten each pha
 What was promised vs what shipped, and the lessons: `BUILD-DIARY.md` beside this file
 (also published as a page: https://claude.ai/artifact/NQvUz4JAF5fbeXYr7xYa9h; the repo copy is the one to append to).
 
-## Now (2026-10-18)
+## Now (2026-10-19)
 
-Phases 1–5 done and verified. **Next: phase 6**, tutorial modules from mazze's
-workshopped excerpts, plus prefab assets.
+**Beta-release track (B1–B6), ahead of phase 6.** Session captured with
+core-sample (armed 2026-10-19; derived ledger lands in `docs/core-sample/`).
+
+- B1 theatre-of-dependencies: npm workspaces support (it saw 0 surviving tubes
+  on agelace because workspace packages were never linked to the root).
+- B2 dependency surface: close the 13 Dependabot alerts with the ritual's
+  scoped overrides; probe folding Excalidraw's Mermaid 11 into Mermaid 12.
+- B3 image: secure-container-template posture (fixed non-root UID, SHA-pinned
+  CI, SBOM + provenance, cosign, Dependabot config); slimmer runtime.
+- B4 `v0.2.0-beta.1`: GHCR multi-arch image, `/portability-check`, then the
+  history audit, then the repo goes public (mazze's call, 2026-10-19).
+- B5 in-browser sandbox demo: the real app, built static, API answered in the
+  tab against a seeded in-memory world.
+- B6 landing page + friend's guide + build-in-public record on the spine
+  (`blog/mazze-leczzare-blog`), real app screenshots, drawn Docker steps.
+
+Phases 1–5 done and verified. Phase 6 (tutorial modules, prefab assets) follows.
 
 Design system for mazze to workshop (private Claude Design System artifact,
 built from main@77b38e8): https://claude.ai/artifact/7QYgLXsN7Ly3Nh4N9m2rL3
@@ -53,6 +68,11 @@ the app: port them into `app/src/styles/tokens.css` by hand.
   router, with a time-ordered journal on entry pages and Y.UndoManager on boards.
 - 2026-10-17 — Server listens on 127.0.0.1 by default; `--share` on the
   launchers opens it to the LAN (iPad).
+- 2026-10-19 — Beta distribution: the repo goes public (mazze), after a
+  full-history audit for secrets and unworkshopped manuscripts. Landing page
+  lives on the spine. The demo is the real app in-browser, not a recording.
+  Docker Desktop install steps are drawn diagrams (no Windows machine here);
+  every agelace screen is a real screenshot.
 
 ## Verified
 
@@ -134,6 +154,14 @@ the app: port them into `app/src/styles/tokens.css` by hand.
   so exposure is low, but `--share` widens it.
 
 ## Log
+
+- 2026-10-19 — Beta track opened. Discovery: 13 open Dependabot alerts, all
+  transitive under the app workspace (Excalidraw → nanoid 3.3.3, its Mermaid
+  converter → Mermaid 11 / katex 0.16 / nanoid 4 / lodash-es; Sass 1.51 →
+  chokidar 3 → braces, no fix published). None are in the runtime image's
+  node_modules (server-only install); they reach users only as bundled browser
+  JS. Image 469 MB, runs as root. theatre-of-dependencies read the lockfile but
+  staged nothing: workspace links are never joined to the root.
 
 - 2026-10-18 — Outside edits on Windows: compose sets `AGELACE_POLL=1`, because
   Docker Desktop on Windows doesn't forward file-change events into the
