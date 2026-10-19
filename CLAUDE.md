@@ -70,9 +70,9 @@ tests that never ran against any code.
   When you add or change a route, add or change its `.bru` file too.
 - Browser: `scripts/browser-check.sh` builds the image, starts it on a throwaway
   world (:8091) and runs every `e2e/*.mjs` suite in Playwright's container:
-  `forge.mjs` (28 checks) and `boards.mjs` (5: Mermaid + KaTeX, the
-  Sketchbook, Excalidraw's Mermaid converter, which is where the dependency
-  overrides live). Exits non-zero on failure, screenshots in `e2e/shots/`. Run
+  `forge.mjs` (28 checks) and `boards.mjs` (7: Mermaid + KaTeX, the
+  Sketchbook, Excalidraw's Mermaid converter (where the dependency
+  overrides live), long titles wrap). Exits non-zero on failure, screenshots in `e2e/shots/`. Run
   it after any UI change, or any change to `overrides`; extend it rather than
   testing by hand.
 - Sandbox (`demo/`): the real app build plus a service worker that runs the

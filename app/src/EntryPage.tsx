@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { EntryKind, Status, type Entry, type EntryPatch, type RichDoc } from "@agelace/shared";
 import type { Editor as TiptapEditor } from "@tiptap/react";
 import type { Transaction } from "@tiptap/pm/state";
@@ -185,6 +185,24 @@ export function EntryPage({ id }: EntryPageProps) {
     };
   }, [id, flush]);
 
+  // The title wraps rather than clipping: a textarea sized to its text. It is
+  // still one line of meaning, so Enter moves into the body and pasted line
+  // breaks become spaces.
+  const titleRef = useRef<HTMLTextAreaElement | null>(null);
+  const title = entry?.title;
+  useLayoutEffect(() => {
+    const el = titleRef.current;
+    if (!el) return;
+    const fit = (): void => {
+      el.style.height = "auto";
+      el.style.height = `${el.scrollHeight}px`;
+    };
+    fit();
+    window.addEventListener("resize", fit);
+    void document.fonts?.ready.then(fit);
+    return () => window.removeEventListener("resize", fit);
+  }, [title]);
+
   if (missing) {
     return (
       <article className="leaf leaf-empty">
@@ -230,11 +248,22 @@ export function EntryPage({ id }: EntryPageProps) {
             {save === "set" ? "set in type" : save === "wet" ? "ink still wet" : save === "drying" ? "drying…" : "blotted — retrying"}
           </span>
         </div>
-        <input
+        <textarea
+          ref={titleRef}
           className="leaf-title"
+          rows={1}
           value={entry.title}
           aria-label="Title"
-          onChange={(e) => e.target.value.trim() && change("title", e.target.value, 650)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              editorRef.current?.commands.focus("start");
+            }
+          }}
+          onChange={(e) => {
+            const v = e.target.value.replace(/\s*[\r\n]+\s*/g, " ");
+            if (v.trim()) change("title", v, 650);
+          }}
         />
       </header>
       <Editor

@@ -62,6 +62,26 @@ const preview = await page.evaluate(() => {
 check("converted flowchart lands on the board", ["Crown", "Moon", "Thief"].every((w) => preview.includes(w)), `${preview.length} chars`);
 await shot("b3-board");
 
+// ── a long title wraps instead of clipping (it used to be an <input>) ──
+const long = await (await fetch(`${BASE}/api/entries`, {
+  method: "POST", headers: { "content-type": "application/json" },
+  body: JSON.stringify({ title: "The Night the Lamps Went Out Over the Drowned Quarter", kind: "chronicle" }),
+})).json();
+await page.goto(`${BASE}/#/e/${long.id}`);
+await page.waitForSelector(".leaf-title");
+await page.waitForTimeout(600);
+const fit = await page.evaluate(() => {
+  const el = document.querySelector(".leaf-title");
+  const lh = parseFloat(getComputedStyle(el).lineHeight);
+  return { clipped: el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1, lines: Math.round(el.clientHeight / lh) };
+});
+check("a long title wraps instead of clipping", !fit.clipped && fit.lines >= 2, JSON.stringify(fit));
+await page.locator(".leaf-title").click();
+await page.keyboard.press("End");
+await page.keyboard.press("Enter");
+check("Enter in the title moves into the text", await page.evaluate(() => !!document.activeElement?.closest(".ProseMirror")));
+await shot("b4-long-title");
+
 // Known, pre-existing (main@9e73923 too): Vite splits Excalidraw's font-subset
 // worker so it imports the Sketchbook chunk, which needs a window; Excalidraw
 // then subsets on the main thread. Logged as Open in docs/journal/CHECKPOINT.md.

@@ -334,6 +334,11 @@ textarea {
   font: 400 var(--step-4) / 1.02 var(--font-display);
   letter-spacing: -0.01em;
   color: var(--color-ink);
+  /* A textarea sized to its text (EntryPage): long titles wrap, never clip. */
+  display: block;
+  resize: none;
+  overflow: hidden;
+  text-wrap: balance;
 }
 .leaf-title:focus-visible {
   outline: none;
