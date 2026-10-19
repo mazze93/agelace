@@ -34,13 +34,15 @@ START AGELACE
 -------------
 
 Windows:  double-click  start-agelace.cmd
-          (if Windows says it protected your PC: click "More info",
-          then "Run anyway")
+          The first time, Windows may warn you because it came from
+          the internet. "Windows protected your PC": click "More info",
+          then "Run anyway". "Open File - Security Warning": click "Run".
 Mac:      double-click  start-agelace.command
           (the first time, right-click it, choose Open, then Open again)
 
-A black window opens and says "Fetching agelace…". The first time takes a
-minute or two while it downloads. After that it starts in seconds.
+A black window opens and says "Fetching agelace...". The first time takes a
+minute or two while it downloads. After that it starts in seconds. When
+it's ready the window closes by itself.
 
 When it's ready, your web browser opens agelace by itself. If it doesn't,
 open your browser and go to:
