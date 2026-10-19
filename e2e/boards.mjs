@@ -76,10 +76,14 @@ const fit = await page.evaluate(() => {
   return { clipped: el.scrollHeight > el.clientHeight + 1 || el.scrollWidth > el.clientWidth + 1, lines: Math.round(el.clientHeight / lh) };
 });
 check("a long title wraps instead of clipping", !fit.clipped && fit.lines >= 2, JSON.stringify(fit));
+// The editor mounts after the title; press Enter only once it exists, then
+// give focus a moment to land (CI flaked when this read focus immediately).
+await page.waitForSelector(".ProseMirror");
 await page.locator(".leaf-title").click();
 await page.keyboard.press("End");
 await page.keyboard.press("Enter");
-check("Enter in the title moves into the text", await page.evaluate(() => !!document.activeElement?.closest(".ProseMirror")));
+const landed = await page.waitForFunction(() => !!document.activeElement?.closest(".ProseMirror"), null, { timeout: 3000 }).then(() => true, () => false);
+check("Enter in the title moves into the text", landed);
 await shot("b4-long-title");
 
 // Known, pre-existing (main@9e73923 too): Vite splits Excalidraw's font-subset

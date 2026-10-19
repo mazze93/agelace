@@ -81,7 +81,11 @@ tests that never ran against any code.
   `scripts/dev.sh npm run build -w demo` → `demo/dist` (Cloudflare Pages,
   its own origin: a worker scoped to the blog's domain would sit in front of
   the whole blog). `scripts/demo-check.sh` runs `e2e/sandbox/demo.mjs`
-  (16 checks) against it on localhost, which is a secure context. Rules: a
+  (16 checks) against it on localhost, which is a secure context. With
+  `BASE=https://agelace-demo.pages.dev` the same suite checks the live deploy.
+  Deploy with `wrangler pages deploy demo/dist --project-name agelace-demo`
+  from a folder with no `functions/` (wrangler bundles the cwd's `functions/`;
+  run from the blog it shipped the blog's middleware into the sandbox). Rules: a
   new route goes in `routes.ts` only; a store may only use the fs calls the
   shim exports (`demo/tsconfig.json` maps `node:fs/promises` to it, so a
   missing one fails typecheck); keep the worker small (private windows

@@ -17,8 +17,10 @@ const check = (name, ok, detail = "") => {
 // ── a static host that honours demo/dist/_headers, as Pages does ──
 const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml",
   ".woff2": "font/woff2", ".woff": "font/woff", ".json": "application/json", ".txt": "text/plain", ".wasm": "application/wasm" };
+// BASE set: test a deployed sandbox (e.g. https://agelace-demo.pages.dev) instead.
+const LIVE = process.env.BASE;
 const rules = [];
-{
+if (!LIVE) {
   let cur = null;
   for (const line of (await readFile(join(DIR, "_headers"), "utf8")).split("\n")) {
     if (!line.trim()) continue;
@@ -29,7 +31,7 @@ const rules = [];
     }
   }
 }
-const server = createServer(async (req, res) => {
+const server = LIVE ? null : createServer(async (req, res) => {
   const path = decodeURIComponent(new URL(req.url, "http://x").pathname);
   let file = normalize(join(DIR, path));
   if (!file.startsWith(DIR)) return res.writeHead(403).end();
@@ -42,8 +44,8 @@ const server = createServer(async (req, res) => {
   res.setHeader("content-type", TYPES[extname(file)] ?? "application/octet-stream");
   res.end(await readFile(file));
 });
-await new Promise((r) => server.listen(4173, "127.0.0.1", r));
-const BASE = "http://localhost:4173";
+if (server) await new Promise((r) => server.listen(4173, "127.0.0.1", r));
+const BASE = LIVE ?? "http://localhost:4173";
 
 const errors = [];
 const browser = await chromium.launch();
@@ -145,7 +147,7 @@ await shot("s6-phone");
 const unexpected = errors.filter((e) => !/Failed to use workers for subsetting/.test(e));
 check("no console errors (CSP included)", !unexpected.length, unexpected.slice(0, 3).join(" | "));
 await browser.close();
-server.close();
+server?.close();
 if (failures.length) {
   console.error(`\n${failures.length} failed: ${failures.join("; ")}`);
   process.exit(1);
