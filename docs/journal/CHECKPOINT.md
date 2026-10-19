@@ -157,6 +157,19 @@ the app: port them into `app/src/styles/tokens.css` by hand.
 
 ## Log
 
+- 2026-10-19 — Outward steps done (mazze's go-ahead): repo public; sandbox
+  live at https://agelace-demo.pages.dev (16/16 against the live URL;
+  the first deploy, run from the blog's folder, bundled the blog's
+  functions/ and was replaced by a static-only one: delete deployment
+  c489ad24); tag v0.2.0-beta.1 → Release workflow green, pre-release with
+  the zip, image signed + verified; blog branch agelace/landing pushed
+  (preview behind Cloudflare Access). Left for mazze: (a) set the GHCR
+  package public (anonymous pull says unauthorized; no API for user
+  packages); (b) review + merge agelace/landing; (c) `/rigor:core-sample
+  compile`; (d) the first real Windows run. Found after publishing:
+  /releases/latest skips pre-releases, so those links 404'd; README and
+  page now link /releases.
+
 - 2026-10-19 — B5 + B6 built and verified. Sandbox (`demo/`, 16 checks) and
   landing + guide (blog branch `agelace/landing` @ de753c2, `npm run check`
   green, drift checks clean). CI green on all five jobs. Waiting on mazze for
