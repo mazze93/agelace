@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch --clear-screen=false src/index.ts",
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node22 --outfile=dist/index.js --external:fastify --external:@fastify/static --external:chokidar --external:@iconify-json/game-icons --external:@iconify/utils --external:zod --external:yjs",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --target=node24 --outfile=dist/index.js --banner:js=\"import { createRequire as __agelaceRequire } from 'node:module'; const require = __agelaceRequire(import.meta.url);\" --legal-comments=linked",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run"
   },

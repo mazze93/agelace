@@ -1,11 +1,23 @@
 # The whole of agelace. Your world lives in ./world next to this file —
 # back that folder up and you have backed up everything.
+# A fixed project name, so upgrading in the same folder keeps the same app.
+name: agelace
 services:
   agelace:
     build: .
     image: agelace:local
     init: true
     restart: unless-stopped
+    # Non-root. The mac/Linux launcher sets these to your own user so the files
+    # in ./world stay yours; on Windows, Docker Desktop's folder sharing lets
+    # the default user write there.
+    user: "${AGELACE_UID:-10001}:${AGELACE_GID:-10001}"
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
     ports:
       # Localhost only by default. To open it to a tablet on your own network,
       # start with AGELACE_BIND=0.0.0.0 (the launchers have a --share option).
@@ -19,7 +31,8 @@ services:
       AGELACE_POLL: "1"
     # Here rather than in the Dockerfile so Docker and Podman both honour it.
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:8080/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      # The runtime image is distroless: no shell, and node at /nodejs/bin/node.
+      test: ["CMD", "/nodejs/bin/node", "-e", "fetch('http://localhost:8080/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
       interval: 10s
       timeout: 3s
       start_period: 10s

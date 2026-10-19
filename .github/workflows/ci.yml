@@ -1,0 +1,159 @@
+name: CI
+
+# Posture from mazze93/secure-container-template: every action pinned to a full
+# commit SHA (Dependabot moves them), least-privilege tokens, a non-root image
+# as a hard gate, SBOM + provenance on anything published.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-fund --no-audit
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests (server, app)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Codex copies match CLAUDE.md
+        run: scripts/sync-agents.sh --check
+
+      - name: npm audit (production dependencies)
+        run: npm audit --omit=dev --audit-level=low
+
+      # The overrides in package.json come from this tool. The gate fails if the
+      # vulnerable surface it can see is at or below OPEN.
+      - name: Theatre of Dependencies gate
+        run: |
+          set -eu
+          git clone -q https://github.com/mazze93/theatre-of-dependencies /tmp/theatre
+          git -C /tmp/theatre checkout -q 45c356fe1b92b2de9f9f49db7442630a7021e1b7
+          node /tmp/theatre/bin/theatre.mjs scan . --no-anim --gate open
+
+      - name: Friend's bundle builds
+        run: |
+          set -eu
+          scripts/release-bundle.sh 0.0.0-ci
+          unzip -l dist/agelace-0.0.0-ci.zip
+
+  api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Dev container deps
+        run: docker compose -f compose.dev.yaml run --rm -T dev npm ci --no-fund --no-audit
+      - name: Bruno collection, headless
+        run: scripts/api-check.sh
+
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Playwright suites against the production image
+        run: scripts/browser-check.sh
+      - name: Keep the screenshots
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: e2e-shots
+          path: e2e/shots/
+          retention-days: 14
+
+  container:
+    runs-on: ubuntu-latest
+    needs: [test]
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Dockerfile declares a non-root USER
+        run: |
+          set -eu
+          grep -Eq '^[[:space:]]*USER[[:space:]]+' Dockerfile || { echo "::error::Dockerfile needs a USER"; exit 1; }
+          if grep -Eqi '^[[:space:]]*USER[[:space:]]+(root|0|0:0)[[:space:]]*$' Dockerfile; then
+            echo "::error::Dockerfile USER must not be root"; exit 1
+          fi
+
+      - uses: docker/setup-qemu-action@99012661954931238ded8c8b007157a8430204e1 # v4.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - name: Build amd64 and load
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64
+          load: true
+          tags: local/agelace:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Image runs non-root, read-only, and serves
+        run: |
+          set -eu
+          user="$(docker image inspect local/agelace:ci --format '{{ .Config.User }}')"
+          echo "Config.User: '$user'"
+          case "$user" in ""|root|0|0:0) echo "::error::image runs as root"; exit 1 ;; esac
+          world="$(mktemp -d)"; chmod 777 "$world"
+          docker run -d --name smoke --read-only --tmpfs /tmp --cap-drop ALL \
+            --security-opt no-new-privileges:true -p 127.0.0.1:8080:8080 -v "$world:/world" local/agelace:ci
+          for _ in $(seq 1 30); do curl -sf localhost:8080/api/health && break; sleep 1; done
+          curl -sf -X POST localhost:8080/api/entries -H 'content-type: application/json' \
+            -d '{"title":"CI smoke","kind":"note"}' >/dev/null
+          test -f "$world/entries/ci-smoke.json"
+          docker exec smoke /nodejs/bin/node -e "fetch('http://localhost:8080/api/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
+          docker image inspect local/agelace:ci --format 'size={{ .Size }}'
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # main publishes :edge, multi-arch, with SBOM and provenance. Releases
+      # (tags) publish the versioned, signed image in release.yml.
+      - name: Publish :edge (multi-arch, SBOM + provenance)
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          sbom: true
+          provenance: mode=max
+          tags: |
+            ${{ env.IMAGE }}:edge
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+          labels: |
+            org.opencontainers.image.revision=${{ github.sha }}
+          cache-from: type=gha

@@ -1,0 +1,129 @@
+agelace @VERSION@ (beta)
+========================
+
+agelace is a workshop for a story world: pages, boards, a map of how
+everything connects, and a forge for your own fonts. It runs on your own
+computer. Nothing is uploaded anywhere. Your whole world is the "world"
+folder inside this one.
+
+There is an illustrated version of this guide, with a picture for every
+step:
+
+    https://mazzeleczzare.com/agelace/guide/
+
+
+WHAT YOU NEED
+-------------
+
+One free program: Docker Desktop. That's all. You don't need to install
+anything else, and you never need to type commands.
+
+    Windows or Mac:  https://www.docker.com/products/docker-desktop/
+
+Install it like any other program, open it once, and accept its terms.
+Wait until it says "Engine running" (bottom left). You can close its
+window after that; it keeps running in the background.
+
+On Windows the installer may ask to restart the computer, or to update
+"WSL". Say yes to both; that's normal. If Docker Desktop later says
+"virtualization" is turned off, that's a setting in the PC's start-up
+(BIOS) menu, and the only step here that may need a helper: ask Mazze.
+
+
+START AGELACE
+-------------
+
+Windows:  double-click  start-agelace.cmd
+          (if Windows says it protected your PC: click "More info",
+          then "Run anyway")
+Mac:      double-click  start-agelace.command
+          (the first time, right-click it, choose Open, then Open again)
+
+A black window opens and says "Fetching agelace…". The first time takes a
+minute or two while it downloads. After that it starts in seconds.
+
+When it's ready, your web browser opens agelace by itself. If it doesn't,
+open your browser and go to:
+
+    http://localhost:8080
+
+Bookmark that address. agelace only exists on your computer, so the link
+won't work on anyone else's.
+
+
+STOP AGELACE
+------------
+
+Windows:  double-click  stop-agelace.cmd
+Mac:      double-click  stop-agelace.command
+
+Or just leave it running. It uses very little, and it starts again on its
+own when Docker Desktop starts.
+
+
+YOUR WORLD IS A FOLDER
+----------------------
+
+Everything you make is saved, as you type, into the "world" folder next to
+this file. There is no save button and no account.
+
+  - To back up: copy the whole folder somewhere safe (a USB stick, cloud
+    storage). That's the entire backup.
+  - To move to a new computer: copy this whole agelace folder across,
+    world included, and start it there.
+  - Things you delete go to world/.trash, not away. You can get them back
+    from there.
+
+You can drop your own font files (.otf, .ttf, .woff2) into world/fonts and
+they appear in the Forge within a few seconds.
+
+
+USE IT FROM A TABLET (OPTIONAL)
+-------------------------------
+
+Start it with "--share" to reach it from a tablet on the same Wi-Fi.
+On Windows: open the folder, click the address bar, type
+    cmd /c start-agelace.cmd --share
+and press Enter. On the tablet, open http://<this computer's IP>:8080.
+(Windows shows the IP under Settings > Network & internet > Properties,
+as "IPv4 address".) Only do this on a home network you trust.
+
+
+IF SOMETHING GOES WRONG
+-----------------------
+
+"Docker isn't running"
+    Open Docker Desktop and wait for "Engine running", then try again.
+
+The window closes straight away, or says something went wrong
+    Open Docker Desktop, click "Containers", click "agelace", and look at
+    the "Logs" tab. Send a photo of that to Mazze.
+
+The browser says it can't connect
+    Wait ten seconds and refresh. The first start can be slow.
+
+"agelace can't write to its world folder"
+    The folder is read-only. Move this whole agelace folder somewhere in
+    your own Documents and start it again.
+
+Port 8080 is already in use
+    Something else is using that address. Ask Mazze; it's a one-line change.
+
+
+UPDATING
+--------
+
+When a new version arrives, unzip it and copy its files over this folder,
+keeping your world folder. Start it as usual.
+
+
+THIS IS A BETA
+--------------
+
+It works, and it's tested, but it hasn't met many computers yet. If
+anything is confusing or broken, tell Mazze. That is the most useful
+thing you can do with a beta.
+
+agelace uses fonts under the SIL Open Font License and icons from
+game-icons.net (CC BY 3.0). The full credits are on the Colophon page
+inside the app.

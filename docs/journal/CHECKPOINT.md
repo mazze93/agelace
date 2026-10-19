@@ -157,6 +157,21 @@ the app: port them into `app/src/styles/tokens.css` by hand.
 
 ## Log
 
+- 2026-10-19 — B3 done. Image 469 MB → 287 MB (distroless Node 24, Debian 13,
+  by digest; server fully bundled, no node_modules; build stage native on
+  $BUILDPLATFORM). Non-root 10001 (launcher passes host UID on mac/Linux),
+  read-only, caps dropped; refuses in words when /world isn't writable.
+  CI + release workflows from secure-container-template's posture (SHA pins
+  resolved from the API, actionlint clean). Friend's zip via
+  `scripts/release-bundle.sh`. Mac launchers gained `.command` wrappers: a
+  `.sh` opens in an editor on double-click, so the README's Mac step never
+  worked. /portability-check: eol PASS, leakage PASS, multi-arch PASS, amd64
+  smoke (x64, uid 10001, create → file → restart → still there) PASS under
+  emulation, launchers PASS by reading (.cmd not executed), least-technical
+  path: three gaps fixed (README sent people to source; Mac `.sh`; no word
+  about WSL/restart/BIOS virtualization). Gates: typecheck 0, 35 + 21 tests,
+  Bruno 26/26, browser 33/33.
+
 - 2026-10-19 — B1 + B2 done. theatre-of-dependencies v0.2.0 (workspaces,
   per-parent scopes, name@version keys, refresh hint) staged two acts; its
   script plus `npm update` and one nested-entry refresh closed all 12

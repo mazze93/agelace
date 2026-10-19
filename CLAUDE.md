@@ -79,7 +79,19 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   it; `--check` exits 1 when they're stale. Never edit the copies.
 - Production: `docker compose up -d --build`, which serves :8080. Launchers
   (`start-agelace.*`, `stop-agelace.*`) sit at the repo root so a
-  non-technical user finds them.
+  non-technical user finds them. They build when a `Dockerfile` sits beside
+  them, else pull the published image. Mac double-click needs the `.command`
+  wrappers (a `.sh` opens in an editor).
+- Release: `scripts/release-bundle.sh <ver>` makes the friend's zip
+  (launchers, a compose file that pulls `ghcr.io/mazze93/agelace:<ver>`,
+  `docs/release/READ-ME-FIRST.txt`). A `v*.*.*` tag runs
+  `.github/workflows/release.yml`: multi-arch push, SBOM + provenance, cosign
+  keyless, GitHub Release with the zip. It needs
+  `docs/release/notes-<ver>.md` and a matching root `package.json` version.
+- CI (`.github/workflows/ci.yml`): typecheck, tests, build, Codex sync,
+  `npm audit`, the theatre-of-dependencies gate, Bruno, both browser suites,
+  and a non-root read-only smoke run; main publishes `:edge`. Every action is
+  pinned to a full SHA; resolve new pins from the API, never from memory.
 - Built-in fonts are curated in `scripts/collect-fonts.mjs` (from @fontsource,
   OFL) and collected at image build. Icons are game-icons.net (CC BY 3.0). The
   Colophon page carries the required attribution, so keep it.
@@ -153,7 +165,17 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   (`start-agelace.cmd` for Windows, `start-agelace.sh` for mac/Linux). They
   should never need Node, git, or a terminal.
 - **Images must be multi-arch** (`linux/amd64` + `linux/arm64`). mazze's Mac is
-  arm64 and the friend's PC is almost certainly amd64.
+  arm64 and the friend's PC is almost certainly amd64. The build stage runs on
+  `$BUILDPLATFORM` (its output is JS and fonts), so only the copy stage is
+  per-arch.
+- Runtime is distroless (`gcr.io/distroless/nodejs24-debian13`, by digest):
+  no shell, no npm, node at `/nodejs/bin/node` (the compose healthcheck uses
+  that path). The server is one esbuild bundle with no `node_modules`, so a
+  server dependency must be importable statically (the icon set is a JSON
+  import, not `createRequire`).
+- The container runs non-root (UID 10001; the mac/Linux launcher passes your
+  own UID via `AGELACE_UID`/`AGELACE_GID`), `read_only`, `cap_drop: ALL`. The
+  server refuses to start, in words, if `/world` isn't writable (exit 78).
 - Line endings are LF via `.gitattributes`, except `*.cmd`/`*.bat`, which stay
   CRLF. A CRLF entrypoint or shell script breaks the container.
 - Host data folder: use a path relative to the compose file (`./world`),

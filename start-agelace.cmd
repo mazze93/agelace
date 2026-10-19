@@ -15,12 +15,24 @@ exit /b 1
 :engine
 if /i "%~1"=="--share" set AGELACE_BIND=0.0.0.0
 if "%AGELACE_PORT%"=="" set AGELACE_PORT=8080
-echo Setting the type... ^(the first start takes a few minutes^)
+if not exist world mkdir world
+if exist Dockerfile goto build
+echo Fetching agelace... ^(the first start downloads it and takes a minute or two^)
+%ENGINE% compose pull -q
+if errorlevel 1 goto failed
+%ENGINE% compose up -d
+if errorlevel 1 goto failed
+goto started
+:build
+echo Setting the type... ^(the first start builds agelace and takes a few minutes^)
 %ENGINE% compose up -d --build
-if errorlevel 1 (
-  pause
-  exit /b 1
-)
+if errorlevel 1 goto failed
+goto started
+:failed
+echo Something went wrong starting agelace. The message above says what.
+pause
+exit /b 1
+:started
 set /a tries=0
 :wait
 curl -fs http://localhost:%AGELACE_PORT%/api/health >nul 2>&1

@@ -1,11 +1,12 @@
-import { createRequire } from "node:module";
 import { getIconData, iconToSVG, replaceIDs } from "@iconify/utils";
 import type { IconifyJSON } from "@iconify/types";
+// A static import (not createRequire) so esbuild bundles the set and the
+// runtime image needs no node_modules at all.
+import gameIcons from "@iconify-json/game-icons/icons.json" with { type: "json" };
 
 // game-icons.net by Lorc, Delapouite & contributors — CC BY 3.0.
 // Credited in the app's Colophon; the attribution must stay.
-const require = createRequire(import.meta.url);
-const set = require("@iconify-json/game-icons/icons.json") as IconifyJSON;
+const set = gameIcons as unknown as IconifyJSON;
 
 const names: string[] = Object.keys(set.icons).sort();
 const svgCache = new Map<string, string>();

@@ -1,0 +1,21 @@
+version: 2
+updates:
+  # Root lockfile covers all three workspaces. Overrides in package.json are
+  # theatre-of-dependencies output: rerun it when an update touches them.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      tiptap:
+        patterns: ["@tiptap/*"]
+      fontsource:
+        patterns: ["@fontsource/*"]
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

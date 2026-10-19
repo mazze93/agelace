@@ -7,3 +7,9 @@ docs
 test-results
 playwright-report
 server/fonts-builtin
+e2e
+bruno
+.agents
+.claude
+*.md
+!README.md

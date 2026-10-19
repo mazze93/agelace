@@ -8,12 +8,20 @@ computer, in a folder you can see and back up.
 
 1. Install **Docker Desktop** (free) and start it. Wait until it says it's running.
    (Podman Desktop works too, if you already use it.)
-2. Double-click **`start-agelace.cmd`** on Windows, or run `./start-agelace.sh`
-   on a Mac.
-3. Your browser opens at <http://localhost:8080>. The first start takes a few
-   minutes. After that it's quick.
+2. Download the zip from the
+   [latest release](https://github.com/mazze93/agelace/releases/latest) and
+   unzip it. (Nothing to build: it fetches a ready, signed image.)
+3. Double-click **`start-agelace.cmd`** on Windows, or
+   **`start-agelace.command`** on a Mac.
+4. Your browser opens at <http://localhost:8080>.
 
-To close it, double-click **`stop-agelace.cmd`** (or run `./stop-agelace.sh`).
+`READ-ME-FIRST.txt` in the zip walks through it, and there's an illustrated
+guide at <https://mazzeleczzare.com/agelace/guide/>.
+
+To close it, double-click **`stop-agelace.cmd`** (or **`stop-agelace.command`**).
+
+The same launchers work in a clone of this repository. There they build the
+image from source instead, so the first start takes a few minutes.
 
 ## Finding your way
 
@@ -55,6 +63,6 @@ Back up the `world` folder and you have backed up everything.
 
 ## Writing on a tablet
 
-Start with `start-agelace.cmd --share` (or `./start-agelace.sh --share`), then
+Start with `start-agelace.cmd --share` (or `./start-agelace.command --share`), then
 open `http://<this computer's address>:8080` on the tablet. Only do this on a
 network you trust.
