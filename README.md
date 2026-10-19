@@ -9,7 +9,7 @@ computer, in a folder you can see and back up.
 1. Install **Docker Desktop** (free) and start it. Wait until it says it's running.
    (Podman Desktop works too, if you already use it.)
 2. Download the zip from the
-   [latest release](https://github.com/mazze93/agelace/releases/latest) and
+   [releases page](https://github.com/mazze93/agelace/releases) (the newest is at the top) and
    unzip it. (Nothing to build: it fetches a ready, signed image.)
 3. Double-click **`start-agelace.cmd`** on Windows, or
    **`start-agelace.command`** on a Mac.
