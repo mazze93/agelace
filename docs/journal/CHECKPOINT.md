@@ -148,12 +148,24 @@ the app: port them into `app/src/styles/tokens.css` by hand.
 - Board: Mermaid source edits replace the whole Y.Text, so concurrent edits to
   the same diagram are last-writer-wins.
 - Podman path untested on a real Podman install (Docker path verified).
-- Dependabot / `npm audit`: transitive advisories (braces, katex, lodash-es,
-  nanoid, …) under Excalidraw and Mermaid. `audit fix --force` would make
-  breaking downgrades, so review by hand. The app runs on localhost by default,
-  so exposure is low, but `--share` widens it.
+- Excalidraw's font-subset worker fails to start (seen 2026-10-19, also on
+  main@9e73923): Vite's split makes `subset-worker.chunk` import the
+  Sketchbook chunk, which touches `window`. Excalidraw falls back to the main
+  thread, so sketch export still works but is slower on big scenes. Fix is a
+  chunking rule for Excalidraw's subset modules; `e2e/boards.mjs` tolerates
+  exactly this message until then.
 
 ## Log
+
+- 2026-10-19 — B1 + B2 done. theatre-of-dependencies v0.2.0 (workspaces,
+  per-parent scopes, name@version keys, refresh hint) staged two acts; its
+  script plus `npm update` and one nested-entry refresh closed all 12
+  fixable advisories. braces (no fix published) closed by overriding Sass's
+  chokidar to 5 under Excalidraw (Sass is never imported; chokidar 3 and
+  braces left the tree, 15 packages gone). `npm audit`: 0. New
+  `e2e/boards.mjs` (5 checks) guards the overridden code paths, including
+  Excalidraw's Mermaid converter on nanoid 5. Pushes blocked by GitHub email
+  privacy (mazze to decide); commits are local.
 
 - 2026-10-19 — Beta track opened. Discovery: 13 open Dependabot alerts, all
   transitive under the app workspace (Excalidraw → nanoid 3.3.3, its Mermaid

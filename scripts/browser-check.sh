@@ -1,6 +1,7 @@
 #!/bin/sh
-# The Forge, end to end, in headless Chromium (Playwright's container), against
-# a freshly built image on a throwaway world. Your ./world is never touched.
+# Every e2e/*.mjs suite (the Forge, boards), in headless Chromium (Playwright's
+# container), against a freshly built image on a throwaway world. Your ./world
+# is never touched. Any failing suite fails the run.
 #   scripts/browser-check.sh        → screenshots in e2e/shots/
 set -e
 cd "$(dirname "$0")/.."
@@ -23,4 +24,4 @@ mkdir -p e2e/shots
 "$ENGINE" run --rm --add-host=host.docker.internal:host-gateway \
   -e BASE="http://host.docker.internal:$PORT" -e SHOTS=/e2e/shots \
   -v "$PWD/e2e:/e2e" mcr.microsoft.com/playwright:v1.49.1-noble \
-  sh -c 'cd /tmp && npm init -y >/dev/null && npm i -s playwright@1.49.1 >/dev/null 2>&1 && cp /e2e/forge.mjs . && node forge.mjs'
+  sh -c 'cd /tmp && npm init -y >/dev/null && npm i -s playwright@1.49.1 >/dev/null 2>&1 && cp /e2e/*.mjs . && rc=0 && for t in /e2e/*.mjs; do echo "── $(basename "$t")"; node "$(basename "$t")" || rc=1; done; exit $rc'

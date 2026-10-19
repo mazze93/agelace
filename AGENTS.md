@@ -69,9 +69,12 @@ reference only. `test-report.md` "passes" tests that never ran against any code.
   with `@usebruno/cli` against a throwaway seeded world in the dev container.
   When you add or change a route, add or change its `.bru` file too.
 - Browser: `scripts/browser-check.sh` builds the image, starts it on a throwaway
-  world (:8091) and runs `e2e/forge.mjs` in Playwright's container: 27 checks,
-  exits non-zero on failure, screenshots in `e2e/shots/`. Run it after any UI
-  change to the Forge; extend it rather than testing by hand.
+  world (:8091) and runs every `e2e/*.mjs` suite in Playwright's container:
+  `forge.mjs` (28 checks) and `boards.mjs` (5: Mermaid + KaTeX, the
+  Sketchbook, Excalidraw's Mermaid converter, which is where the dependency
+  overrides live). Exits non-zero on failure, screenshots in `e2e/shots/`. Run
+  it after any UI change, or any change to `overrides`; extend it rather than
+  testing by hand.
 - Codex copies: `AGENTS.md` and `.agents/skills/` are generated from this file
   and `.claude/skills/` by `scripts/sync-agents.sh`. After editing either, run
   it; `--check` exits 1 when they're stale. Never edit the copies.
