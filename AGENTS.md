@@ -20,12 +20,13 @@ Phases 1–5 built (2026-10-18): container + folder-backed API + design system +
 rich-text editor + Yjs canvas ("boards") + the Pattern (graph view, `#/pattern`) +
 the Forge (`#/forge`: type case, pairing, Scriptorium glyph drawing → .otf).
 Next: phase 6, tutorial modules and prefab assets. Plan, decisions and
-resume point: `docs/journal/CHECKPOINT.md`. The root Perplexity `*.md` files are
-reference only. `test-report.md` "passes" tests that never ran against any code.
+resume point: `docs/journal/CHECKPOINT.md`. The Perplexity planning files are
+reference only, in `docs/reference/perplexity/`; its `test-report.md` "passes"
+tests that never ran against any code.
 
 **Decisions (2026-10-17)**
 - Story data lives in files on the host (`./world`, mounted at `/world`). This
-  replaces the browser-storage plan in `agelace.md`.
+  replaces the browser-storage plan in `docs/reference/perplexity/agelace.md`.
 - Stack: Vite + React + TS strict (app), Node + Fastify (server), TipTap
   (editor). This is a local app, so no Astro or Cloudflare.
 - The canvas is our own engine, **not tldraw**: its licence needs a key in
