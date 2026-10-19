@@ -6,7 +6,8 @@
   "workspaces": [
     "shared",
     "server",
-    "app"
+    "app",
+    "demo"
   ],
   "engines": {
     "node": ">=22"

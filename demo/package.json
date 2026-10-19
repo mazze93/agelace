@@ -1,0 +1,12 @@
+{
+  "name": "@agelace/demo",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "agelace in the browser: the real app build, with the server's own routes and stores running in a service worker on an IndexedDB-backed filesystem.",
+  "scripts": {
+    "build": "node build.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  }
+}

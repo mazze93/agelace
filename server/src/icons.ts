@@ -8,14 +8,18 @@ import gameIcons from "@iconify-json/game-icons/icons.json" with { type: "json" 
 // Credited in the app's Colophon; the attribution must stay.
 const set = gameIcons as unknown as IconifyJSON;
 
-const names: string[] = Object.keys(set.icons).sort();
+// Built on first use, not at load: the in-browser demo fills the set in after
+// its worker starts, rather than carrying 6 MB of icons in the worker script.
+let sorted: string[] | null = null;
+const allNames = (): string[] => (sorted ??= Object.keys(set.icons).sort());
 const svgCache = new Map<string, string>();
 
 export function iconNames(): string[] {
-  return names;
+  return allNames();
 }
 
 export function searchIcons(q: string, limit = 120): string[] {
+  const names = allNames();
   const terms = q.toLowerCase().split(/[\s-]+/).filter(Boolean);
   if (!terms.length) return names.slice(0, limit);
   const scored: [string, number][] = [];

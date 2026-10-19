@@ -16,13 +16,14 @@ cleanup() {
   rm -rf "$world"
 }
 trap cleanup EXIT
-# The world dir must be writable by the image's non-root user on any host.
-chmod 777 "$world"
 "$ENGINE" build -q -t "$NAME" . >/dev/null
 # Playwright reaches the app by name on a private network. Going through the
 # host's gateway works on OrbStack but not on a stock Linux Docker.
 "$ENGINE" network create "$NET" >/dev/null
-"$ENGINE" run -d --name "$NAME" --network "$NET" -p "127.0.0.1:$PORT:8080" -v "$world:/world" "$NAME" >/dev/null
+# Run as the invoking user, as the mac/Linux launcher does, so the files the
+# app writes into the throwaway world are ours to clean up afterwards.
+"$ENGINE" run -d --name "$NAME" --network "$NET" --user "$(id -u):$(id -g)" \
+  -p "127.0.0.1:$PORT:8080" -v "$world:/world" "$NAME" >/dev/null
 up=""
 for _ in $(seq 1 60); do
   curl -sf "localhost:$PORT/api/health" >/dev/null && { up=1; break; }

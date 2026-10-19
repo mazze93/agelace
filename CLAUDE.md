@@ -75,6 +75,17 @@ tests that never ran against any code.
   overrides live). Exits non-zero on failure, screenshots in `e2e/shots/`. Run
   it after any UI change, or any change to `overrides`; extend it rather than
   testing by hand.
+- Sandbox (`demo/`): the real app build plus a service worker that runs the
+  server's own route table (`server/src/routes.ts`) and stores on an
+  in-memory filesystem written through to IndexedDB (`demo/src/fs.ts`).
+  `scripts/dev.sh npm run build -w demo` → `demo/dist` (Cloudflare Pages,
+  its own origin: a worker scoped to the blog's domain would sit in front of
+  the whole blog). `scripts/demo-check.sh` runs `e2e/sandbox/demo.mjs`
+  (16 checks) against it on localhost, which is a secure context. Rules: a
+  new route goes in `routes.ts` only; a store may only use the fs calls the
+  shim exports (`demo/tsconfig.json` maps `node:fs/promises` to it, so a
+  missing one fails typecheck); keep the worker small (private windows
+  refused to install it at 7 MB), which is why the icon set loads at runtime.
 - Codex copies: `AGENTS.md` and `.agents/skills/` are generated from this file
   and `.claude/skills/` by `scripts/sync-agents.sh`. After editing either, run
   it; `--check` exits 1 when they're stale. Never edit the copies.

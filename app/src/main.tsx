@@ -16,8 +16,15 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { App } from "./App";
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+// The in-browser sandbox (demo/) starts its stand-in server before the app
+// renders. In the normal build this flag is false and the import is dropped.
+const ready: Promise<void> =
+  import.meta.env.VITE_AGELACE_DEMO === "1" ? import("../../demo/src/boot").then((m) => m.startSandbox()) : Promise.resolve();
+
+void ready.then(() =>
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  ),
 );

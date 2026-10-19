@@ -15,6 +15,7 @@ COPY package.json package-lock.json ./
 COPY shared/package.json shared/
 COPY server/package.json server/
 COPY app/package.json app/
+COPY demo/package.json demo/
 RUN npm ci --no-fund --no-audit
 COPY . .
 # The server bundle carries every dependency (no node_modules at runtime).

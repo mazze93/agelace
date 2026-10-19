@@ -1,0 +1,16 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "WebWorker"],
+    "types": [],
+    "noEmit": true,
+    // The same swap the esbuild build makes: the server's stores typecheck
+    // against the shims, so a store calling an fs function the shim lacks
+    // fails here, not in a visitor's browser.
+    "paths": {
+      "node:fs/promises": ["./src/fs.ts"],
+      "node:path": ["./src/path.ts"]
+    }
+  },
+  "include": ["src/sw.ts", "src/fs.ts", "src/path.ts", "test", "../server/src/opentype.d.ts"]
+}
