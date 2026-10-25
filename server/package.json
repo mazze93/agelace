@@ -15,7 +15,7 @@
     "@iconify-json/game-icons": "^1.2.4",
     "@iconify/types": "^2.0.0",
     "@iconify/utils": "^3.1.7",
-    "chokidar": "^5.0.0",
+    "chokidar": "^6.0.0",
     "fastify": "^5.12.7",
     "opentype.js": "^2.0.0",
     "zod": "^4.6.7",
