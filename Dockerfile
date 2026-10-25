@@ -9,7 +9,7 @@
 # ── build: app bundle, server bundle, built-in font library ─────────────
 # Runs on the builder's own platform: its output is JavaScript and fonts, so a
 # multi-arch build compiles once, natively, and only the copy stage is per-arch.
-FROM --platform=$BUILDPLATFORM docker.io/library/node:24-bookworm-slim@sha256:a5f4366e834695d5f363b920c104953a535d3a9864d1bdf74566a0ebe01daee5 AS build
+FROM --platform=$BUILDPLATFORM docker.io/library/node:26-bookworm-slim@sha256:28147155d47dc31abe0a46e0d12b59b2fb3d0a2dcc5dc65fce76a074180b16fe AS build
 WORKDIR /src
 COPY package.json package-lock.json ./
 COPY shared/package.json shared/
